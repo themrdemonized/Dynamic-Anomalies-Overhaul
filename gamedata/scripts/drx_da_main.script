@@ -96,6 +96,47 @@ local function printf(...)
 	end
 end
 
+local smoothed_values = {}
+
+--EMA smoothing for changing values
+local default_smoothing = 500
+local alpha_table = {}
+
+local function ema(key, value, def, steps)
+	local steps = steps or default_smoothing
+	if not alpha_table[steps] then alpha_table[steps] = 2.0 / (steps + 1) end
+
+	local smoothing_alpha = alpha_table[steps]
+	smoothed_values[key] = smoothed_values[key] and smoothed_values[key] + smoothing_alpha * (value - smoothed_values[key]) or def or value
+	--printf("EMA fired, key %s, target %s, current %s, going %s", key, value, smoothed_values[key], (value > smoothed_values[key] and "up" or "down"))
+	return smoothed_values[key]
+end
+
+local function dema(key, value, def, steps)
+	local e = ema(key, value, def, steps)
+	smoothed_values[key] = 2 * e - ema(key, e, def, steps)
+	--printf("DEMA fired, key %s, target %s, current %s, going %s", key, value, smoothed_values[key], (value > smoothed_values[key] and "up" or "down"))
+	return smoothed_values[key]
+end
+
+local function look_at_position(pos, actor)
+	if pos then
+		local pos = vector():set(pos.x, pos.y, pos.z)
+		local actor = actor or db.actor
+	
+		local actor_position = device().cam_pos
+		local actor_direction = device().cam_dir
+		local look_distance = actor_position:distance_to(pos)
+		local look_position = vector():set(actor_position):add(actor_direction:mul(look_distance))
+
+		look_position.x = ema("look_x", pos.x, look_position.x)
+		look_position.y = ema("look_y", pos.y, look_position.y)
+		look_position.z = ema("look_z", pos.z, look_position.z)
+
+		actor:actor_look_at_point(look_position)
+	end
+end
+
 -- Table of current active effects, contains tables of these {
 -- timer = time_elapsed + timer in seconds, how long effect will be applied
 -- effect = function(), the function of the effect
@@ -331,10 +372,13 @@ allowed_artefacts = (function() -- Allowed artefacts to spawn
 		t["af_control"] = true
 		t["af_geliy"] = true
 		t["af_gimlet"] = true
+		t["af_monolith"] = true
+		t["af_oasis_heart"] = true
 		t["af_quest_b14_twisted"] = true
 		t["af_vaselisk"] = true
 		t["jup_b1_half_artifact"] = true
 		t["marker"] = true
+		t["monolith_shard"] = true
 		ini_sys:section_for_each(function(sec)
 			if SYS_GetParam(0, sec, "kind", "") == "i_arty_cont" then -- Exclude artefacts in containers
 				t[sec] = true
@@ -1443,7 +1487,40 @@ local anomalies_vars = {
 		{code = 98325, file = "electra.ppe", factor = 1},
 	}
 }
+
+-- Defined radius of anomalies behaviour
+anomalies_near_actor_radii = {
+	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4
+}
+
 anomalies_near_actor_functions = {
+
+	-- Darkness, spawns poltergeist behind the actor
+	zone_mine_darkness = function(anomaly, actor, distance_to_sqr, radius_sqr)
+		if not anomaly.spawn_time then anomaly.spawn_time = 0 end
+		if time_elapsed < anomaly.spawn_time then return end
+
+		local spawn_chance = 5
+		local spawn_cooldown = 90
+		local spawn_max_amount = 3
+		local spawn_table = {
+			"m_poltergeist_normal_tele",
+			"m_poltergeist_normal_flame",
+		}
+
+		printf("DRX DA, trying to spawn poltergeist")
+
+		if math.random() * 100 <= 1 then
+			anomaly.spawn_time = time_elapsed + spawn_cooldown
+			for i = 1, math.random(spawn_max_amount) do
+				local actor_position = actor:position()
+				local spawn_position = vector():set(actor_position.x - random_float(5, 7), actor_position.y, actor_position.z - random_float(5, 7))
+				local spawn_section = spawn_table[math.random(#spawn_table)]
+
+				alife_create(spawn_section, spawn_position, level.vertex_id(spawn_position), alife():actor().m_game_vertex_id)
+			end
+		end
+	end,
 
 	-- Green Dragon, lower speed by 50% near it
 	zone_mine_green_dragon = function(anomaly, actor, distance_to_sqr, radius_sqr)
@@ -1507,19 +1584,19 @@ anomalies_near_actor_functions = {
 	end,
 
 	zone_mine_gravitational_average = function(anomaly, actor, distance_to_sqr, radius_sqr)
-		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr)
+		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr, 1)
 	end,
 
 	zone_mine_gravitational_strong = function(anomaly, actor, distance_to_sqr, radius_sqr)
-		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr)
+		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr, 1)
 	end,
 
 	zone_mine_vortex = function(anomaly, actor, distance_to_sqr, radius_sqr)
-		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr)
+		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr, 1)
 	end,
 
 	zone_mine_springboard = function(anomaly, actor, distance_to_sqr, radius_sqr)
-		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr)
+		anomalies_near_actor_functions.zone_mine_gravitational_weak(anomaly, actor, distance_to_sqr, radius_sqr, 1)
 	end,
 
 	zone_mine_blast = function(anomaly, actor, distance_to_sqr, radius_sqr)
@@ -1774,8 +1851,16 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 
 	local section = self.section 
 	if anomalies_near_actor_functions[section] then
+		-- Get behaviour radius and check if actor inside it, then apply effect
+		-- Behaviour radius in priorities
+		--    1. anomalies_near_actor_radii[section] -- specially defined behaviour radius
+		--    2. anomaly_radii[section].max -- defined hit radius of anomaly
+		--    3. max_radius -- max hit radius defined in level config
+		--    4. 3 -- default radius
+		--    5. p.2,3,4 or 5 is then added 1 and multiplied by 2
+
 		local actor = db.actor
-		local radius = ((anomaly_radii[section] and anomaly_radii[section].max or max_radius or 3) + 1) * 2
+		local radius = anomalies_near_actor_radii[section] or (((anomaly_radii[section] and anomaly_radii[section].max or max_radius or 3) + 1) * 2)
 		local radius_sqr = radius * radius
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr and delta > 50 then
@@ -1825,7 +1910,7 @@ anomalies_hit_functions = {
 	zone_mine_flash = function(s_hit, bone_id, flags, actor)
 		printf("change_time")
 		local health = actor.health
-		level.change_game_time(0, math.random(0, 3), math.random(1, 59))
+		level.change_game_time(0, math.random(2, 5), math.random(1, 59))
 		s_hit.power = 0.001
 		CreateTimeEvent("zone_mine_flash", "zone_mine_flash", 0.05, function()
 			local new_health = actor.health

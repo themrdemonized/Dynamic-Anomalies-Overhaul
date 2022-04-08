@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+<string_table>
+	
+	<string id="encyclopedia_anomalies_radar">
+		<text>Радар</text>
+	</string>
+	<string id="encyclopedia_anomalies_radar_text">
+		<text>
+			%c[pda_white]Радар%c[ui_gray_1] - пси-аномалия.
+			\n \n%c[pda_green]Информация%c[ui_gray_1]
+			\nНаносит пси-урон, имеет слабую пси-ауру, которая тем не менее влияет непосредственно на сталкеров, проникая сквозь любую защиту.\n
+		</text>
+	</string>
+
+
+</string_table>

@@ -77,7 +77,7 @@ jobs:
         run: |
           mkdir Dynamic_Anomalies_MAIN
           cp -R gamedata Dynamic_Anomalies_MAIN
-          zip -r 'Perk_Based_Artefacts.zip' readme.txt Dynamic_Anomalies_MAIN Dynamic_Anomalies_PATCH_Arszi_Radiation_Overhaul
+          zip -r 'Dynamic_Anomalies_Overhaul.zip' readme.txt Dynamic_Anomalies_MAIN Dynamic_Anomalies_PATCH_Arszi_Radiation_Overhaul
         env: 
           RELEASE_NAME_FULL: "Dynamic Anomalies Overhaul"
       

@@ -1,5 +1,7 @@
 MODDED EXES ARE REQUIRED FOR WORK: https://github.com/themrdemonized/STALKER-Anomaly-modded-exes
 
+DLTX OR FDDA EXES ALSO WORK
+
 Dynamic Anomalies Overhaul 0.1
 Written by demonized, 2022
 Based on work by DoctorX and Eugenium Hazardous Anomalies

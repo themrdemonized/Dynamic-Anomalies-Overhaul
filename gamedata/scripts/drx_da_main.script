@@ -1542,19 +1542,30 @@ end
 
 
 local anomalies_vars = {
-	zone_mine_gravitational_weak_tg = 0,
-	zone_mine_electric_tg = 0,
-	zone_mine_electric_pp_effectors = {
-		{code = 98324, file = "electra_mine.ppe", factor = 0.5},
-		{code = 98325, file = "electra.ppe", factor = 1},
-	},
-	zone_mine_ghost_sin_lut = (function()
+	-- Quick lookup of sine values by degrees
+	sin_lut = (function()
 		local t = {}
 		for i = 0, 360 do
 			t[i] = math.sin(i * 0.0174533)
 		end
 		return t
 	end)(),
+
+	-- Quick lookup of cosine values by degrees
+	cos_lut = (function()
+		local t = {}
+		for i = 0, 360 do
+			t[i] = math.cos(i * 0.0174533)
+		end
+		return t
+	end)(),
+
+	zone_mine_gravitational_weak_tg = 0,
+	zone_mine_electric_tg = 0,
+	zone_mine_electric_pp_effectors = {
+		{code = 98324, file = "electra_mine.ppe", factor = 0.5},
+		{code = 98325, file = "electra.ppe", factor = 1},
+	},
 }
 
 -- Defined radius of anomalies behaviour
@@ -1606,16 +1617,33 @@ anomalies_near_actor_functions = {
 	-- Radar, negative psy aura
 	zone_mine_radar = function(anomaly, actor, distance_to_sqr, radius_sqr)
 		local h = hit()
-		h.power = level_environment.is_actor_immune() and 0 or math.cos(distance_to_sqr / radius_sqr * 0.5 * math.pi) * 0.01
-		h.type = hit.telepatic	
-		h.impulse = 0
-		h.direction = VEC_Z
-		h.draftsman = actor
-		
-		-- printf("hit actor: p %s, radius_sqr %s, distance_to_sqr %s", h.power, radius_sqr, distance_to_sqr)
-		actor:hit(h)
+		h.power = level_environment.is_actor_immune() and 0 or (1 - distance_to_sqr / radius_sqr) * 0.015
+		if h.power > 0 then
+			h.type = hit.telepatic	
+			h.impulse = 0
+			h.direction = VEC_Z
+			h.draftsman = actor
+			
+			actor:hit(h)
 
-		change_psy_health(-0.1 * h.power)
+			-- Artefacts protection
+			local hit_additional = 0
+			actor:iterate_belt( function(owner, obj)
+				local sec = obj:section()
+				local cond = obj:condition()
+				local immunities_sec = SYS_GetParam(0, sec, "hit_absorbation_sect", sec)
+				local prot = SYS_GetParam(2, immunities_sec, "telepatic_immunity", 0) * cond
+
+				-- Optional modifier for viability
+				prot = prot * 3
+				hit_additional = hit_additional + prot
+			end)
+
+			-- Final modifier
+			local hit_modifier = hit_additional >= 0 and 1 + hit_additional or 1 / (1 - hit_additional)
+			local actor_hit_power = h.power / hit_modifier * 0.1
+			change_psy_health(-actor_hit_power)
+		end
 	end,
 
 	-- Sphere, add 50% bullet damage resist
@@ -1863,9 +1891,14 @@ anomalies_spawn_functions = {
 		if anomaly.spawn_position then
 			local spawn_position = anomaly.spawn_position
 			local obj = anomaly.object
-			local key = "zone_mine_ghost_" .. anomaly.object:id()
+			local obj_set_anomaly_position = obj.set_anomaly_position
+			local vector = vector()
+			local vector_set = vector.set
+			local key = "zone_mine_ghost_" .. obj:id()
 
-			local sin_lut = anomalies_vars.zone_mine_ghost_sin_lut
+			local max = math.max
+
+			local sin_lut = anomalies_vars.sin_lut
 			local i = 0
 			local full_circle = 360
 
@@ -1873,28 +1906,18 @@ anomalies_spawn_functions = {
 				return math.random() * 3
 			end
 
-			local x_modifier = generate_distance() * random_choice(1, 0, -1)
-			local z_modifier = generate_distance() * random_choice(1, 0, -1)
-
-			if x_modifier == 0 and y_modifier == 0 then
-				-- True - x, false - y
-				local choice = random_choice(true, false)
-				if choice then
-					x_modifier = generate_distance() * random_choice(1, -1)
-				else
-					y_modifier = generate_distance() * random_choice(1, -1)
-				end
-			end
+			local x_modifier = generate_distance() * random_choice(1, -1)
+			local z_modifier = generate_distance() * random_choice(1, -1)
 
 			register_callback("actor_on_update", function()
 				if i >= full_circle then
-					i = 0
+					i = i - full_circle
 				end
 
 				local offset_x = spawn_position.x + sin_lut[i] * x_modifier
 				local offset_z = spawn_position.z + sin_lut[i] * z_modifier
 
-				obj:set_anomaly_position(vector():set(offset_x, spawn_position.y, offset_z))
+				obj_set_anomaly_position(obj, vector_set(vector, offset_x, spawn_position.y, offset_z))
 				i = i + 1
 			end, nil, key)
 		end

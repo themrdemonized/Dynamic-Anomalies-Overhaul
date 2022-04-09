@@ -1403,6 +1403,68 @@ function unregister_drx_da()
 	UnregisterScriptCallback("actor_on_update", drx_da_actor_on_update_callback)
 end
 
+function unregister_anomalies_behaviour()
+	remove_queue("drx_da_anomalies_behaviour")
+end
+
+-- Sections to ignore on/off switch behaviour
+anomalies_do_not_register_behaviour = {
+	zone_mine_ghost = true
+}
+
+function register_anomalies_behaviour()
+	local level_name = level.name()
+	if is_empty(updated_anomaly_levels[level_name]) or is_empty(updated_anomaly_levels[level_name].anomalies) then
+	 	printf("DRX DA anomalies, anomalies not found for level %s", level_name)
+	 	return
+	end
+
+	if 	is_empty(updated_anomaly_levels[level_name].anomalies_properties) or
+		size_table(updated_anomaly_levels[level_name].anomalies_properties) ~= size_table(updated_anomaly_levels[level_name].anomalies)
+	then
+		for k, v in pairs(updated_anomaly_levels[level_name].anomalies) do
+			updated_anomaly_levels[level_name].anomalies_properties[v] = generate_random_anomaly_properties()
+		end
+	end
+
+	printf("DRX DA anomalies, turning on behaviour for level %s", level_name)
+
+	for k, v in pairs(updated_anomaly_levels[level_name].anomalies_properties) do
+		v.update_time = time_global()
+	end
+
+	local get_object = level.object_by_id
+	local time_global = time_global
+
+	process_queue("drx_da_anomalies_behaviour", updated_anomaly_levels[level_name].anomalies_properties, function(id, props, i)
+		local t = time_global()
+
+		-- if is_empty(props) then
+		-- 	printf("DRX DA Error, anomaly behaviour not found for %s, level %s", id, level_name)
+		-- 	return true
+		-- end
+
+		local obj = get_object(id)
+		if not obj or anomalies_do_not_register_behaviour[obj:section()] then return end
+
+		if props.active then
+			if t - props.update_time > props.time_active then
+				-- printf("DRX DA anomaly disabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
+				props.update_time = t
+				props.active = false
+				obj:disable_anomaly()
+			end
+		else
+			if t - props.update_time > props.time_cooldown then
+				-- printf("DRX DA anomaly enabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
+				props.update_time = t
+				props.active = true
+				obj:enable_anomaly()
+			end	
+		end
+	end)
+end
+
 anomalies_pos_tree = nil
 anomalies_obj_to_pos = {}
 anomalies_sec_to_obj = {}
@@ -1478,14 +1540,21 @@ function build_anomalies_pos_tree()
 	end
 end
 
--- Special anomalies behaviour if the actor is near an anomaly
+
 local anomalies_vars = {
 	zone_mine_gravitational_weak_tg = 0,
 	zone_mine_electric_tg = 0,
 	zone_mine_electric_pp_effectors = {
 		{code = 98324, file = "electra_mine.ppe", factor = 0.5},
 		{code = 98325, file = "electra.ppe", factor = 1},
-	}
+	},
+	zone_mine_ghost_sin_lut = (function()
+		local t = {}
+		for i = 0, 360 do
+			t[i] = math.sin(i * 0.0174533)
+		end
+		return t
+	end)(),
 }
 
 -- Defined radius of anomalies behaviour
@@ -1493,6 +1562,7 @@ anomalies_near_actor_radii = {
 	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4
 }
 
+-- Special anomalies behaviour if the actor is near an anomaly
 anomalies_near_actor_functions = {
 
 	-- Darkness, spawns poltergeist behind the actor
@@ -1785,61 +1855,90 @@ anomalies_near_actor_functions = {
 
 }
 
-function unregister_anomalies_behaviour()
-	remove_queue("drx_da_anomalies_behaviour")
+-- Special behaviour for anomalies after spawn
+anomalies_spawn_functions = {
+
+	-- Ghost, wandering path along its start position
+	zone_mine_ghost = function(anomaly)
+		if anomaly.spawn_position then
+			local spawn_position = anomaly.spawn_position
+			local obj = anomaly.object
+			local key = "zone_mine_ghost_" .. anomaly.object:id()
+
+			local sin_lut = anomalies_vars.zone_mine_ghost_sin_lut
+			local i = 0
+			local full_circle = 360
+
+			local function generate_distance()
+				return math.random() * 3
+			end
+
+			local x_modifier = generate_distance() * random_choice(1, 0, -1)
+			local z_modifier = generate_distance() * random_choice(1, 0, -1)
+
+			if x_modifier == 0 and y_modifier == 0 then
+				-- True - x, false - y
+				local choice = random_choice(true, false)
+				if choice then
+					x_modifier = generate_distance() * random_choice(1, -1)
+				else
+					y_modifier = generate_distance() * random_choice(1, -1)
+				end
+			end
+
+			register_callback("actor_on_update", function()
+				if i >= full_circle then
+					i = 0
+				end
+
+				local offset_x = spawn_position.x + sin_lut[i] * x_modifier
+				local offset_z = spawn_position.z + sin_lut[i] * z_modifier
+
+				obj:set_anomaly_position(vector():set(offset_x, spawn_position.y, offset_z))
+				i = i + 1
+			end, nil, key)
+		end
+	end,
+
+}
+
+-- Special behaviour for anomalies after destroy
+anomalies_destroy_functions = {
+
+	-- Ghost, destroy callback for wandering
+	zone_mine_ghost = function(anomaly)
+		local key = "zone_mine_ghost_" .. anomaly.object:id()
+		unregister_callback(key)
+	end,
+
+}
+
+bind_anomaly_field_spawn = bind_anomaly_field.anomaly_field_binder.net_spawn
+bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
+	if not bind_anomaly_field_spawn(self, se_abstract) then
+		return false
+	end
+
+	self.spawn_position = self.object:position()
+	if not self.section then self.section = self.object:section() end
+
+	local section = self.section
+	if anomalies_spawn_functions[section] then
+		anomalies_spawn_functions[section](self)
+	end
+
+	return true
 end
 
-function register_anomalies_behaviour()
-	local level_name = level.name()
-	if is_empty(updated_anomaly_levels[level_name]) or is_empty(updated_anomaly_levels[level_name].anomalies) then
-	 	printf("DRX DA anomalies, anomalies not found for level %s", level_name)
-	 	return
+bind_anomaly_field_destroy = bind_anomaly_field.anomaly_field_binder.net_destroy
+bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
+	if not self.section then self.section = self.object:section() end
+	local section = self.section
+	if anomalies_destroy_functions[section] then
+		anomalies_destroy_functions[section](self)
 	end
 
-	if 	is_empty(updated_anomaly_levels[level_name].anomalies_properties) or
-		size_table(updated_anomaly_levels[level_name].anomalies_properties) ~= size_table(updated_anomaly_levels[level_name].anomalies)
-	then
-		for k, v in pairs(updated_anomaly_levels[level_name].anomalies) do
-			updated_anomaly_levels[level_name].anomalies_properties[v] = generate_random_anomaly_properties()
-		end
-	end
-
-	printf("DRX DA anomalies, turning on behaviour for level %s", level_name)
-
-	for k, v in pairs(updated_anomaly_levels[level_name].anomalies_properties) do
-		v.update_time = time_global()
-	end
-
-	local get_object = level.object_by_id
-	local time_global = time_global
-
-	process_queue("drx_da_anomalies_behaviour", updated_anomaly_levels[level_name].anomalies_properties, function(id, props, i)
-		local t = time_global()
-
-		-- if is_empty(props) then
-		-- 	printf("DRX DA Error, anomaly behaviour not found for %s, level %s", id, level_name)
-		-- 	return true
-		-- end
-
-		local obj = get_object(id)
-		if not obj then return end
-
-		if props.active then
-			if t - props.update_time > props.time_active then
-				-- printf("DRX DA anomaly disabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
-				props.update_time = t
-				props.active = false
-				obj:disable_anomaly()
-			end
-		else
-			if t - props.update_time > props.time_cooldown then
-				-- printf("DRX DA anomaly enabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
-				props.update_time = t
-				props.active = true
-				obj:enable_anomaly()
-			end	
-		end
-	end)
+	bind_anomaly_field_destroy(self)
 end
 
 -- Special behaviour is actor near an anomaly

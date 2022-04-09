@@ -1385,7 +1385,6 @@ function drx_da_actor_on_update_callback()
 		unregister_drx_da()
 		build_anomalies_pos_tree()
 		RegisterScriptCallback("actor_on_update", actor_on_update)
-
 		return
 	end
 
@@ -2011,8 +2010,14 @@ function actor_on_interaction(typ, obj, name)
 		last_surge_time = get_time_elapsed()
 		printf("DRX DA surge happened globally at %s", last_surge_time)
 		printf("DRX DA update on level %s after emission", level.name())
-		-- clean_dynamic_anomalies_on_level(level.name())
-		clean_dynamic_anomalies_global()
+		
+		-- 50/50 chance to remove anomalies globally or just update artefacts
+		if math.random(100) <= 50 then
+			clean_dynamic_anomalies_global()
+		else
+			clean_artefacts_on_level(level.name())
+			spawn_artefacts_on_level(level.name())
+		end
 	end
 end
 

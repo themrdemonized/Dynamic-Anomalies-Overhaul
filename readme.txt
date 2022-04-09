@@ -2,7 +2,7 @@ MODDED EXES ARE REQUIRED FOR WORK: https://github.com/themrdemonized/STALKER-Ano
 
 DLTX OR FDDA EXES ALSO WORK
 
-Dynamic Anomalies Overhaul 0.1
+Dynamic Anomalies Overhaul 0.2
 Written by demonized, 2022
 Based on work by DoctorX and Eugenium Hazardous Anomalies
 Features
@@ -16,9 +16,9 @@ Features
  	Enhanced behaviour of usual anomalies
 
 New anomalies:
-	- "Darkness" - typical one shot anomaly, very omnious looking, met only on north locations 
+	- "Darkness" - typical one shot anomaly, very omnious looking, met only on north locations. Special behaviour - has a chance to spawn poltergeist in the proximity of player
 	- "Flash" - bubbly temporal anomaly, which doesnt hurt the player by itself, but travels him forward in time
-	- "Ghost" - Green bubble anomaly
+	- "Ghost" - Green bubble anomaly that moves along the fixed path
 	- "Liquid gold" - Yellow acid pool like anomaly
 	- "Green dragon" - Acid field anomaly, special behaviour - 50% reduction of speed near anomaly
 	- "Mefistotel" - Strange flower-like anomaly

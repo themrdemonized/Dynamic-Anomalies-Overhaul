@@ -1709,7 +1709,7 @@ anomalies_near_actor_functions = {
 
 		local effector_modifier = effector_modifier or 0.66
 		local closest_mine = anomalies_sec_to_obj.zone_mine_electric:nearest(actor:position())
-		local effector_power = (1.05 - (closest_mine and math.min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr) * effector_modifier
+		local effector_power = (1.05 - (closest_mine and math.min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr) ^ 2 * effector_modifier
 		local pps = anomalies_vars.zone_mine_electric_pp_effectors
 		for i = 1, #pps do
 			local key = "zone_mine_electric" .. pps[i].code

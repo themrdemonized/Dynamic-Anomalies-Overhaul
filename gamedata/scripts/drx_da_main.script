@@ -1444,7 +1444,10 @@ function register_anomalies_behaviour()
 		-- end
 
 		local obj = get_object(id)
-		if not obj or anomalies_do_not_register_behaviour[obj:section()] then return end
+		if not obj then return end
+
+		-- Remove from queue if its in do_not_register_behaviour table
+		if anomalies_do_not_register_behaviour[obj:section()] then return true end
 
 		if props.active then
 			if t - props.update_time > props.time_active then

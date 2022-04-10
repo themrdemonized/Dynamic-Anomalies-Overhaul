@@ -2014,14 +2014,21 @@ end
 function actor_on_interaction(typ, obj, name)
 	-- check if emission happened globally
 	if typ == "anomalies" and (name == "emission_end" or name == "psi_storm_end") then
-		last_surge_time = get_time_elapsed()
-		printf("DRX DA surge happened globally at %s", last_surge_time)
-		printf("DRX DA update on level %s after emission", level.name())
-		
+
 		-- 50/50 chance to remove anomalies globally or just update artefacts
 		if math.random(100) <= 50 then
-			clean_dynamic_anomalies_global()
+			CreateTimeEvent("clean_dynamic_anomalies_global", "clean_dynamic_anomalies_global", 0.5, function()
+				last_surge_time = get_time_elapsed()
+
+				printf("DRX DA surge happened globally at %s", last_surge_time)
+				printf("DRX DA update on level %s after emission", level.name())
+
+				clean_dynamic_anomalies_global()
+				return true
+			end)
 		else
+			printf("DRX DA surge happened globally at %s", get_time_elapsed())
+			printf("DRX DA update artefacts on level %s after emission", level.name())
 			clean_artefacts_on_level(level.name())
 			spawn_artefacts_on_level(level.name())
 		end
@@ -2048,7 +2055,7 @@ anomalies_hit_functions = {
 		local change_minutes = math.random(1, 59)
 
 		level.change_game_time(0, change_hours, change_minutes)
-		level_weathers.get_weather_manager():forced_weather_change()
+		level_weathers.get_weather_manager():select_weather(true)
 		surge_manager.get_surge_manager().time_forwarded = true
 		psi_storm_manager.get_psi_storm_manager().time_forwarded = true
 
@@ -2072,8 +2079,8 @@ anomalies_hit_functions = {
 			local change_sleep_amount = (change_hours * 3600 + change_minutes * 60) / sleep_params.check_after_sec * sleep_params.step * 0.01
 			local change_thirst_amount = (change_hours * 3600 + change_minutes * 60) / thirst_params.check_after_sec * thirst_params.step * 0.01
 
-			thirst_sleep_changer.change_sleep_small(round(change_sleep_amount))
-			thirst_sleep_changer.change_thirst_small(round(change_thirst_amount))
+			thirst_sleep_changer.change_sleep(round(change_sleep_amount))
+			thirst_sleep_changer.change_thirst(round(change_thirst_amount))
 			return true
 		end)
 	end,
@@ -2183,6 +2190,7 @@ end
 function on_game_start()
 	RegisterScriptCallback("actor_on_before_hit", actor_on_before_hit)
 	RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
+	RegisterScriptCallback("npc_on_item_take", actor_on_item_take)
 	RegisterScriptCallback("actor_on_interaction", actor_on_interaction)
 	RegisterScriptCallback("on_before_level_changing", on_before_level_changing)
     RegisterScriptCallback("save_state", save_anomalies)

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="windows-1251" ?>
+<string_table>
+	
+	<string id="encyclopedia_anomalies_radar">
+		<text>Radar</text>
+	</string>
+	<string id="encyclopedia_anomalies_radar_text">
+		<text>
+			• Name: %c[d_cyan]Radar%c[ui_gray_1]
+			\n• Type: %c[d_orange]Psi anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nIt is a localized breach in the noosphere. It deals psi damage and has a weak psi aura, which nevertheless affects the stalkers directly, penetrating through any defenses.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_darkness">
+		<text>Darkness</text>
+	</string>
+	<string id="encyclopedia_anomalies_darkness_text">
+		<text>
+			• Name: %c[d_cyan]Darkness%c[ui_gray_1]
+			\n• Type: %c[d_orange]Psi anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nA terrifying kind of formation of unknown origin, affecting the mind of any sentient being in its vicinity. There are rumors that the anomaly acts as a shelter for poltergeists.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_flash">
+		<text>Flash</text>
+	</string>
+	<string id="encyclopedia_anomalies_flash_text">
+		<text>
+			• Name: %c[d_cyan]Flash%c[ui_gray_1]
+			\n• Type: %c[d_orange]Temporal anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nA rift in the space-time continuum. The creature caught in the anomaly experiences rapid time travel to an unknown temporal distance. Despite the seeming danger, some clever stalkers even use these rifts for their own purposes, such as escaping from pursuit or waiting for the best moment to find artifacts. 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_ghost">
+		<text>Ghost</text>
+	</string>
+	<string id="encyclopedia_anomalies_ghost_text">
+		<text>
+			• Name: %c[d_cyan]Ghost%c[ui_gray_1]
+			\n• Type: %c[d_orange]Electro-chemical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nSpherical electro-chemical anomaly. Distinctive feature - the anomaly moves along a fixed path through a certain area, as if trying to find another victim.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_gold">
+		<text>Liquid Gold</text>
+	</string>
+	<string id="encyclopedia_anomalies_gold_text">
+		<text>
+			• Name: %c[d_cyan]Liquid Gold%c[ui_gray_1]
+			\n• Type: %c[d_orange]Chemical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nThe twin brother of the Fruit Punch anomaly, emits a cloud of orange/gold toxic chemical substance.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_green_dragon">
+		<text>Green Dragon</text>
+	</string>
+	<string id="encyclopedia_anomalies_green_dragon_text">
+		<text>
+			• Name: %c[d_cyan]Green Dragon%c[ui_gray_1]
+			\n• Type: %c[d_orange]Chemical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nA poisonous cloud of unknown chemical composition. The anomaly cloud adversely affects the biological functions of the trapped organism, as if enveloping it in kissel and greatly reducing its motor abilities.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_mefistotel">
+		<text>Mephistopheles</text>
+	</string>
+	<string id="encyclopedia_anomalies_mefistotel_text">
+		<text>
+			• Name: %c[d_cyan]Mephistopheles%c[ui_gray_1]
+			\n• Type: %c[d_orange]Electro-chemical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nFor some reason, named after a medieval evil spirit, the strange flower-like formation. It emits an extremely unpleasant sound in close proximity.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_net">
+		<text>Net</text>
+	</string>
+	<string id="encyclopedia_anomalies_net_text">
+		<text>
+			• Name: %c[d_cyan]Net%c[ui_gray_1]
+			\n• Type: %c[d_orange]Gravity-electrical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nThis formation is a stream of charged particles accelerated under the action of gravity. The object falling into the space of the anomaly, the particles envelope it like a net, for which this anomaly got its name 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_point">
+		<text>Ball Lightning</text>
+	</string>
+	<string id="encyclopedia_anomalies_point_text">
+		<text>
+			• Name: %c[d_cyan]Ball Lightning%c[ui_gray_1]
+			\n• Type: %c[d_orange]Electrical anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nAnomaly of electrical nature, reminiscent of the well-known natural phenomenon. It has an unconfirmed interaction with electrical objects, especially with batteries and capacitors, filling them with electrical energy. Nevertheless you should not be too fond of getting close to the anomaly for safety reasons. 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_sphere">
+		<text>Press</text>
+	</string>
+	<string id="encyclopedia_anomalies_sphere_text">
+		<text>
+			• Name: %c[d_cyan]Press%c[ui_gray_1]
+			\n• Type: %c[d_orange]Gravitational anomaly%c[ui_gray_1]
+			\n \n%c[d_green]Information%c[ui_gray_1]
+			\nGravitational anomaly, which is a concentrated standing waves of space, forming some kind of disc, perpendicular to the ground. This disc can act as a kind of shield or cover that repels or reduces the speed of fast objects such as bullets or projectiles, which can be used by stalkers to their advantage. 
+		</text>
+	</string>
+
+</string_table>

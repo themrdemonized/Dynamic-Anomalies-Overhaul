@@ -141,6 +141,22 @@ local function look_at_position(pos, actor)
 	end
 end
 
+local get_safe_sound_object = xr_sound.get_safe_sound_object
+local function play_sound_on_actor(snd, volume, frequency)
+	if not snd then
+		printf("DRX DA snd is nil")
+		return
+	end
+	local actor = db.actor
+	local snd = get_safe_sound_object(snd)
+	if snd then
+		snd:play(actor, 0, sound_object.s2d)
+		snd.volume = volume or 1
+		snd.frequency = frequency or 1
+		return snd
+	end
+end
+
 -- Table of current active effects, contains tables of these {
 -- timer = time_elapsed + timer in seconds, how long effect will be applied
 -- effect = function(), the function of the effect
@@ -1652,14 +1668,15 @@ anomalies_near_actor_functions = {
 		end
 	end,
 
-	-- Sphere, add 50% bullet damage resist
+	-- Sphere, add 50-100% bullet damage resist
 	zone_mine_sphere = function(anomaly, actor, distance_to_sqr, radius_sqr)
 		local key = "zone_mine_sphere"
 
 		if not callbacks[key] then
 			register_callback("actor_on_before_hit", function(s_hit, bone_id, flags)
 				if s_hit.type == hit.fire_wound then
-					s_hit.power = s_hit.power * 0.5
+					s_hit.power = s_hit.power * random_float(0, 0.5)
+					play_sound_on_actor("\\eugenium_anomaly\\sphere\\sphere_blowout.ogg", 0.9, random_float(0.95, 1.05))
 				end
 			end, nil, key)
 		end
@@ -1881,7 +1898,7 @@ anomalies_near_actor_functions = {
 			if item then
 				local cond = item:condition()
 				if cond > 0.01 then
-					item:set_condition((cond + 0.001) * (1 - distance_to_sqr / radius_sqr))
+					item:set_condition(cond + 0.001 * (1 - distance_to_sqr / radius_sqr))
 				end
 			end
 		end
@@ -1978,7 +1995,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	if not self.section then self.section = self.object:section() end
 
 	local section = self.section 
-	if anomalies_near_actor_functions[section] then
+	if anomalies_near_actor_functions[section] or additional_articles_to_category.encyclopedia_anomalies[section] then
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		-- Behaviour radius in priorities
 		--    1. anomalies_near_actor_radii[section] -- specially defined behaviour radius
@@ -1993,7 +2010,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr and delta > 50 then
 			open_anomaly_article(section)
-			anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr)
+			if anomalies_near_actor_functions[section] then anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr) end
 
 			-- printf("DRX DA, actor near anomaly %s, firing effect, delta %s", section, delta)
 		end
@@ -2204,7 +2221,16 @@ end
 -- Table contains category and entries in game section => article string id format
 additional_articles_to_category = {
 	encyclopedia_anomalies = {
-		zone_mine_radar = "encyclopedia_anomalies_radar"
+		zone_mine_radar = "encyclopedia_anomalies_radar",
+		zone_mine_darkness = "encyclopedia_anomalies_darkness",
+		zone_mine_flash = "encyclopedia_anomalies_flash",
+		zone_mine_ghost = "encyclopedia_anomalies_ghost",
+		zone_mine_gold = "encyclopedia_anomalies_gold",
+		zone_mine_green_dragon = "encyclopedia_anomalies_green_dragon",
+		zone_mine_mefistotel = "encyclopedia_anomalies_mefistotel",
+		zone_mine_net = "encyclopedia_anomalies_net",
+		zone_mine_point = "encyclopedia_anomalies_point",
+		zone_mine_sphere = "encyclopedia_anomalies_sphere",
 	}
 }
 
@@ -2217,7 +2243,7 @@ opened_articles = {
 function open_anomaly_article(section)
 	-- If there is no article to begin with - return
 	if not additional_articles_to_category.encyclopedia_anomalies[section] then
-		-- printf("article not found for %s", section)
+		printf("article not found for %s", section)
 		return
 	end
 

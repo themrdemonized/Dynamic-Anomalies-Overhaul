@@ -2,15 +2,123 @@
 <string_table>
 	
 	<string id="encyclopedia_anomalies_radar">
-		<text>Радар</text>
+		<text>«Радар»</text>
 	</string>
 	<string id="encyclopedia_anomalies_radar_text">
 		<text>
-			%c[pda_white]Радар%c[ui_gray_1] - пси-аномалия.
-			\n \n%c[pda_green]Информация%c[ui_gray_1]
-			\nНаносит пси-урон, имеет слабую пси-ауру, которая тем не менее влияет непосредственно на сталкеров, проникая сквозь любую защиту.\n
+			• Название: %c[d_cyan]Радар%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Пси-аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nПредставляет собой локализованный пробой в ноосфере. Наносит пси-урон, имеет слабую пси-ауру, которая тем не менее влияет непосредственно на сталкеров, проникая сквозь любую защиту.
 		</text>
 	</string>
 
+	<string id="encyclopedia_anomalies_darkness">
+		<text>«Тьма»</text>
+	</string>
+	<string id="encyclopedia_anomalies_darkness_text">
+		<text>
+			• Название: %c[d_cyan]Тьма%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Пси-аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nУстрашающего вида образование неизвестного происхождения, влияющее на разум любого разумного существа, находящегося рядом с ним. Ходят слухи, что аномалия является убежищем для полтергейстов.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_flash">
+		<text>«Вспышка»</text>
+	</string>
+	<string id="encyclopedia_anomalies_flash_text">
+		<text>
+			• Название: %c[d_cyan]Вспышка%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Временная аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nРазрыв в пространственно-временном континиуме. Существо, попавшее в аномалию, испытывает стремительное перемещение во времени на неизвестное временное расстояние. Несмотря на кажущуюся опасность, некоторые ушлые сталкеры даже используют данные разрывы в своих целях, например, чтобы сбежать от преследования или дождаться лучшего момента для поиска артефактов. 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_ghost">
+		<text>«Призрак»</text>
+	</string>
+	<string id="encyclopedia_anomalies_ghost_text">
+		<text>
+			• Название: %c[d_cyan]Призрак%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Электро-химическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nШарообразная электро-химическая аномалия. Отличительная особенность - аномалия движется по фиксированному пути по определенной местности, словно пытаясь найти очередную жертву.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_gold">
+		<text>«Жидкое золото»</text>
+	</string>
+	<string id="encyclopedia_anomalies_gold_text">
+		<text>
+			• Название: %c[d_cyan]Жидкое золото%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Химическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nБрат-близнец аномалии "Кисель", испускает облако ядовитой химической субстанции оранжевого/золотого цвета.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_green_dragon">
+		<text>«Зеленый Дракон»</text>
+	</string>
+	<string id="encyclopedia_anomalies_green_dragon_text">
+		<text>
+			• Название: %c[d_cyan]Зеленый Дракон%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Химическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nЯдовитое облако неизвестного химического состава. Облака аномалии негативно влияет на биологические функции попавшего организма, словно обволакивая его в кисель и значительно уменьшая его двигательные способности.
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_mefistotel">
+		<text>«Мефистофель»</text>
+	</string>
+	<string id="encyclopedia_anomalies_mefistotel_text">
+		<text>
+			• Название: %c[d_cyan]Мефистофель%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Электро-химическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nПо какой-то причине названное в честь средневекового злого духа, странное цветкоподобное образование. Испускает крайне неприятный звук вблизи
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_net">
+		<text>«Сеть»</text>
+	</string>
+	<string id="encyclopedia_anomalies_net_text">
+		<text>
+			• Название: %c[d_cyan]Сеть%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Гравитационно-электрическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nДанное образование представляет собой поток ускоренных под действием гравитации заряженных частиц. При попадании объекта в пространство аномалии, частицы окутывают его словно сетка, за что данная аномалия и получила свое название 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_point">
+		<text>«Шаровая молния»</text>
+	</string>
+	<string id="encyclopedia_anomalies_point_text">
+		<text>
+			• Название: %c[d_cyan]Шаровая молния%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Электрическая аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nАномалия электрической природы, напоминающее известное природное явление. Имеет непотвержденное взаимодействие с электрическими предметами, в особенности с аккумуляторами и конденсаторами, наполняя их электрической энергией. Тем не менее не стоит увлекаться нахождением вблизи аномалии в целях безопасности 
+		</text>
+	</string>
+
+	<string id="encyclopedia_anomalies_sphere">
+		<text>«Давилка»</text>
+	</string>
+	<string id="encyclopedia_anomalies_sphere_text">
+		<text>
+			• Название: %c[d_cyan]Давилка%c[ui_gray_1]
+			\n• Тип: %c[d_orange]Гравитационная аномалия%c[ui_gray_1]
+			\n \n%c[d_green]Информация%c[ui_gray_1]
+			\nГравитационная аномалия, представляющая собой сконцетрированные стоячие волны пространства, формирующие некое подобие диска, перпендикулярного земле. Данный диск может играть роль своеобразного щита или укрытия, которое отталкивает или уменьшает скорость быстрых объектов таких как пули или снаряды, что может использоваться сталкерами в свою пользу. 
+		</text>
+	</string>
 
 </string_table>

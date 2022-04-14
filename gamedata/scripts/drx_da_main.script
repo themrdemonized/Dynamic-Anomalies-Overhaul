@@ -351,7 +351,7 @@ anomaly_radii = {
 	zone_mine_electra = {min = 2, max = 3},
 	zone_mine_electric_weak = {min = 2, max = 3},
 	zone_mine_flash = {min = 2, max = 3},
-	zone_mine_ghost = {min = 2, max = 3},
+	zone_mine_ghost = {min = 2, max = 2},
 	zone_mine_gold = {min = 2, max = 3},
 	zone_mine_gravitational_weak = {min = 2, max = 3},
 	zone_mine_gravitational_average = {min = 3, max = 4},
@@ -1592,7 +1592,8 @@ local anomalies_vars = {
 
 -- Defined radius of anomalies behaviour
 anomalies_near_actor_radii = {
-	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4
+	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4,
+	zone_mine_gold = anomaly_radii.zone_mine_gold.max * 3
 }
 
 -- Special anomalies behaviour if the actor is near an anomaly
@@ -1904,6 +1905,20 @@ anomalies_near_actor_functions = {
 		end
 	end,
 
+	-- Liquid Gold, drains stamina and thirst
+	zone_mine_gold = function(anomaly, actor, distance_to_sqr, radius_sqr)
+		local change_modifier = 1 - distance_to_sqr / radius_sqr
+		if not anomaly.trigger_threshold then anomaly.trigger_threshold = 0 end
+
+		anomaly.trigger_threshold = anomaly.trigger_threshold + change_modifier * 0.5
+		if anomaly.trigger_threshold >= 1 then
+			thirst_sleep_changer.change_thirst_small(0.01)
+			anomaly.trigger_threshold = 0
+		end
+
+		actor:change_power(-change_modifier * 0.002)
+	end,
+
 }
 
 -- Special behaviour for anomalies after spawn
@@ -1922,7 +1937,20 @@ anomalies_spawn_functions = {
 			local max = math.max
 
 			local sin_lut = anomalies_vars.sin_lut
+			local cos_lut = anomalies_vars.cos_lut
+
 			local i = 0
+			local i_step = random_choice(1, 2, 3)
+			local j = 0
+			local j_step = 1
+			if i_step == 1 then
+				j_step = random_choice(2, 3)
+			elseif i_step == 2 then
+				j_step = random_choice(1, 3)
+			elseif i_step == 3 then
+				j_step = random_choice(2, 4)
+			end
+
 			local full_circle = 360
 
 			local function generate_distance()
@@ -1932,16 +1960,32 @@ anomalies_spawn_functions = {
 			local x_modifier = generate_distance() * random_choice(1, -1)
 			local z_modifier = generate_distance() * random_choice(1, -1)
 
+			local function wrap(i)
+				return i >= full_circle and i % full_circle or i
+			end
+
+			local t = 0
+			local t_update = 20
+			local time_global = time_global
 			register_callback("actor_on_update", function()
+				local tg = time_global()
+				if tg < t then return end
+				t = tg + t_update
+
 				if i >= full_circle then
-					i = i - full_circle
+					i = i % full_circle
+				end
+
+				if j >= full_circle then
+					j = j % full_circle
 				end
 
 				local offset_x = spawn_position.x + sin_lut[i] * x_modifier
-				local offset_z = spawn_position.z + sin_lut[i] * z_modifier
+				local offset_z = spawn_position.z + sin_lut[j] * z_modifier
 
 				obj_set_anomaly_position(obj, vector_set(vector, offset_x, spawn_position.y, offset_z))
-				i = i + 1
+				i = i + i_step
+				j = j + j_step
 			end, nil, key)
 		end
 	end,
@@ -2008,7 +2052,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 		local radius = anomalies_near_actor_radii[section] or (((anomaly_radii[section] and anomaly_radii[section].max or max_radius or 3) + 1) * 2)
 		local radius_sqr = radius * radius
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
-		if distance_to_sqr <= radius_sqr and delta > 50 then
+		if distance_to_sqr <= radius_sqr then
 			open_anomaly_article(section)
 			if anomalies_near_actor_functions[section] then anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr) end
 

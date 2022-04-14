@@ -363,10 +363,10 @@ anomaly_radii = {
 	zone_mine_radar = {min = 2, max = 3},
 	zone_mine_sphere = {min = 2, max = 3},
 	zone_mine_springboard = {min = 2, max = 3},
-	zone_mine_thermal_weak = {min = 2, max = 3},
-	zone_mine_vapour = {min = 2, max = 3},
+	zone_mine_thermal_weak = {min = 1, max = 2},
+	zone_mine_vapour = {min = 1, max = 2},
 	zone_mine_vortex = {min = 2, max = 3},
-	zone_mine_zharka = {min = 2, max = 3},
+	zone_mine_zharka = {min = 1, max = 2},
 }
 
 allowed_artefacts = (function() -- Allowed artefacts to spawn
@@ -1939,7 +1939,7 @@ anomalies_spawn_functions = {
 			local sin_lut = anomalies_vars.sin_lut
 			local cos_lut = anomalies_vars.cos_lut
 
-			local i = 0
+			local i = random_choice(0, 45, 90, 135, 180)
 			local i_step = random_choice(1, 2, 3)
 			local j = 0
 			local j_step = 1
@@ -1954,7 +1954,7 @@ anomalies_spawn_functions = {
 			local full_circle = 360
 
 			local function generate_distance()
-				return math.random() * 3
+				return math.random() * 2.5 + 0.5
 			end
 
 			local x_modifier = generate_distance() * random_choice(1, -1)

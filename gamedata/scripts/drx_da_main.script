@@ -339,10 +339,10 @@ anomaly_radii = {
 	zone_field_radioactive_average = {min = 5, max = 8},
 	zone_field_radioactive_strong = {min = 5, max = 8},
 	zone_field_radioactive_weak = {min = 5, max = 8},
-	zone_radioactive = {min = 5, max = 8},
-	zone_radioactive_average = {min = 5, max = 8},
-	zone_radioactive_strong = {min = 5, max = 8},
-	zone_radioactive_weak = {min = 5, max = 8},
+	zone_radioactive = {min = 4, max = 6},
+	zone_radioactive_average = {min = 4, max = 6},
+	zone_radioactive_strong = {min = 4, max = 6},
+	zone_radioactive_weak = {min = 4, max = 6},
 	
 	zone_mine_acid = {min = 2, max = 3},
 	zone_mine_acidic_weak = {min = 2, max = 3},
@@ -2039,7 +2039,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	if not self.section then self.section = self.object:section() end
 
 	local section = self.section 
-	if anomalies_near_actor_functions[section] or additional_articles_to_category.encyclopedia_anomalies[section] then
+	if anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		-- Behaviour radius in priorities
 		--    1. anomalies_near_actor_radii[section] -- specially defined behaviour radius

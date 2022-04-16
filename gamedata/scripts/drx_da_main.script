@@ -1387,11 +1387,13 @@ function drx_da_update_dynamic_anomalies(force)
 			local anomalies = drx_da_spawn_anomalies_on_level(level_name)
 	    	if not anomalies then
 	    		printf("DRX DA Error, failed to spawn anomalies")
+	    		build_anomalies_pos_tree()
 	    		return true
 	    	end
 
 	    	printf("DRX DA, updated anomalies on level %s", level_name)
 	    	updated_anomaly_levels[level_name].time = last_surge_time
+	    	build_anomalies_pos_tree()
 	    	register_anomalies_behaviour()
 	    	spawn_artefacts_on_level(level_name)
 	    	return true

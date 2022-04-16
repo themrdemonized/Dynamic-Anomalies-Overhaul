@@ -11,7 +11,7 @@ ef_weapon_type			= 17
 postprocess		= postprocess_gravi_mine
 
 ;----------- Anomaly settings -----------------------
-max_start_power		= 0.4
+max_start_power		= 0.65
 attenuation			= 1
 
 idle_particles				= eugenium_anomalies\anomaly_sphere\sphere_idle
@@ -37,8 +37,8 @@ body_tearing_sound	= anomaly\anomaly_body_tear_1						;звук разрывани€ трупа
 entrance_sound		= eugenium_anomaly\sphere\sphere_blowout								;при попадании объекта в аномалию
 
 hit_type			= strike
-hit_impulse_scale			= 9.4							;соотношение физического импульса и силы хита
-effective_radius			= 1							;размер радиуса в процентах от оригинального, где действует зона
+hit_impulse_scale			= 7.5							;соотношение физического импульса и силы хита
+effective_radius			= 2							;размер радиуса в процентах от оригинального, где действует зона
 
 disable_time		= 5000		;врем€ игнорировани€ неживого объекта в зоне (-1 если не нужно)
 disable_time_small	= 5000		;врем€ игнорировани€ маленького неживого объекта в зоне (-1 если не нужно)
@@ -64,9 +64,9 @@ blowout_light_time			= 59
 blowout_explosion_time		= 59
 
 ;параметры телекинеза дл€ зоны
-throw_in_impulse			                = 40000000	                ;сила вт€гивани€ дл€ единичной массы на рассто€нии один метр
-throw_out_impulse				= 15		;сила выбрасывани€ взрывом
-throw_in_impulse_alive			= 60000000 	;сила импульса вт€гивани€ дл€ живых
+throw_in_impulse			                = -60000000	                ;сила вт€гивани€ дл€ единичной массы на рассто€нии один метр
+throw_out_impulse				= 40000000		;сила выбрасывани€ взрывом
+throw_in_impulse_alive			= -60000000 	;сила импульса вт€гивани€ дл€ живых
 throw_in_atten				= 10                           ;коэфф. зат€гивани€ (чем меньше, тем плавнее зат€гивает)
 blowout_radius_percent			= 1	                ;радиус (в процентах от всего радиуса) непосредственно выброса
 actor_blowout_radius_percent	                = 1

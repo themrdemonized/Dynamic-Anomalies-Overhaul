@@ -383,7 +383,7 @@ anomaly_radii = {
 	zone_mine_net = {min = 2, max = 3},
 	zone_mine_point = {min = 2, max = 3},
 	zone_mine_radar = {min = 2, max = 3},
-	zone_mine_sphere = {min = 2, max = 3},
+	zone_mine_sphere = {min = 3, max = 4},
 	zone_mine_springboard = {min = 2, max = 3},
 	zone_mine_thermal_weak = {min = 1, max = 2},
 	zone_mine_vapour = {min = 1, max = 2},

@@ -30,6 +30,30 @@
 --
 -- ------------------------------------------------------------------------------------------------
 
+-- MCM
+-- Load the defaults
+local function load_defaults()
+	local t = {}
+	local op = drx_da_main_mcm.op
+	for i, v in ipairs(op.gr) do
+		if v.def ~= nil then
+			t[v.id] = v.def
+		end
+	end
+	return t
+end
+
+local settings = load_defaults()
+
+local function load_settings()
+	settings = load_defaults()
+	if ui_mcm then
+		for k, v in pairs(settings) do
+			settings[k] = ui_mcm.get("drx_da/" .. k)
+		end
+	end
+end
+
 -- UTILS
 --Recursive print of tables similar to PHP print_r function
 local print_r = print_r or function(t) 
@@ -91,11 +115,9 @@ local remove_queue = demonized_concurrent_queues.remove_queue
 local add_speed = speed.add_speed
 local remove_speed = speed.remove_speed
 
-local debug_mode = true
-
 local og_printf = printf
 local function printf(...)
-	if debug_mode then
+	if settings.debug_mode then
 		og_printf(...)
 	end
 end
@@ -424,9 +446,6 @@ allowed_artefacts = (function() -- Allowed artefacts to spawn
 	return t
 end)()
 
-
-max_artefacts_per_zone = 2
-artefacts_spawn_chance = 0.1 -- Each of artefacts from max_artefacts_per_zone will have that chance to spawn
 anomaly_type_to_artefacts = { -- Table of spawn artefacts by anomaly zone section
 
 }
@@ -1001,7 +1020,7 @@ function drx_da_spawn_anomalies_on_level(level_name)
 
 	local level_file = level_data.level_file
 	local spawn_percent = level_data.spawn_percent
-	local anomaly_max_number = level_data.anomaly_max_number
+	local anomaly_max_number = level_data.anomaly_max_number * settings.anomaly_amount_modifier
 	local anomaly_max_active = level_data.anomaly_max_active
 
     -- Build a list of available smart terrains:
@@ -1307,8 +1326,8 @@ function spawn_artefacts_on_level(level_name)
     	local anomalies_by_smart =  updated_anomaly_levels[level_name].anomalies_by_smart
         for smart_name, _ in pairs(anomalies_by_smart) do
         	if is_not_empty(anomalies_by_smart[smart_name]) then
-	        	for i = 1, max_artefacts_per_zone do
-	        		if random() <= artefacts_spawn_chance then
+	        	for i = 1, settings.max_artefacts_per_zone do
+	        		if random() <= settings.artefacts_spawn_chance then
 			        	-- Choose an artefact to spawn:
 			        	local anomaly_type = updated_anomaly_levels[level_name].anomaly_types_by_smart[smart_name]
 			        	local picked_artefact = anomaly_type and
@@ -1395,6 +1414,7 @@ function drx_da_actor_on_update_callback()
     if t < tg then return end
     tg = t + tg_interval
 
+    load_settings()
     get_actor_psy_table()
     init_anomaly_table_global(level.name())
 
@@ -2036,7 +2056,6 @@ bind_anomaly_field_update = bind_anomaly_field.anomaly_field_binder.update
 bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	bind_anomaly_field_update(self, delta)
 	if not self.object then return end
-	if not self.section then self.section = self.object:section() end
 
 	local section = self.section 
 	if anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
@@ -2147,38 +2166,49 @@ anomalies_hit_functions = {
 	end,
 
 	-- Radiation field: drain batteries of active items
-	zone_field_radioactive = function(s_hit, bone_id, flags, actor)
-		if s_hit.power <= 0 then return end
-		for i = 8, 10 do
-			local item = actor:item_in_slot(i)
-			if item then
-				local cond = item:condition()
-				if cond > 0.01 then
-					item:set_condition(cond - 0.03 * s_hit.power)
-				end
-			end
-		end
-	end,
-	zone_field_radioactive_weak = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_field_radioactive_average = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_field_radioactive_strong = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_radioactive = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_radioactive_weak = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_radioactive_average = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
-	end,
-	zone_radioactive_strong = function(s_hit, bone_id, flags, actor)
-		anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- zone_field_radioactive = function(s_hit, bone_id, flags, actor)
+	-- 	if s_hit.power <= 0 then return end
+	-- 	for i = 8, 10 do
+	-- 		local item = actor:item_in_slot(i)
+	-- 		if item then
+	-- 			local cond = item:condition()
+	-- 			if cond > 0.01 then
+	-- 				item:set_condition(cond - 0.03 * s_hit.power)
+	-- 			end
+	-- 		end
+	-- 	end
+	-- end,
+	-- zone_field_radioactive_weak = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_field_radioactive_average = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_field_radioactive_strong = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_radioactive = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_radioactive_weak = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_radioactive_average = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+	-- zone_radioactive_strong = function(s_hit, bone_id, flags, actor)
+	-- 	anomalies_hit_functions.zone_field_radioactive(s_hit, bone_id, flags, actor)
+	-- end,
+
+}
+
+-- Anomalies special hit behaviour on monster
+anomalies_monster_hit_functions = {
+
+	-- Flash special hit behaviour - Time travel
+	zone_mine_flash = function(monster, s_hit, bone_id, flags, actor)
+		flags.ret_value = false
+		alife_release(monster)
 	end,
 
 }
@@ -2189,6 +2219,15 @@ function actor_on_before_hit(s_hit, bone_id, flags)
 	local sec = s_hit.draftsman:section()
 	if anomalies_hit_functions[sec] then
 		anomalies_hit_functions[sec](s_hit, bone_id, flags, db.actor)
+	end
+end
+
+function monster_on_before_hit(monster, s_hit, bone_id, flags)
+	if not s_hit.draftsman then return end
+
+	local sec = s_hit.draftsman:section()
+	if anomalies_monster_hit_functions[sec] then
+		anomalies_monster_hit_functions[sec](s_hit, bone_id, flags, db.actor)
 	end
 end
 
@@ -2247,6 +2286,10 @@ function on_before_level_changing()
 	UnregisterScriptCallback("save_state", save_level)
 end
 
+local function on_option_change()
+	load_settings()
+end
+
 -- Register callback scripts:
 function on_game_start()
 	RegisterScriptCallback("actor_on_before_hit", actor_on_before_hit)
@@ -2257,6 +2300,8 @@ function on_game_start()
     RegisterScriptCallback("save_state", save_anomalies)
     RegisterScriptCallback("save_state", save_level)
     RegisterScriptCallback("load_state", load_state)
+    RegisterScriptCallback("on_game_load", load_settings)
+	RegisterScriptCallback("on_option_change", on_option_change)
 end
 
 -- Patches

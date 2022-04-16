@@ -1,0 +1,13 @@
+op = {
+	id = "drx_da", sh = true, gr = {
+    	{id = "banner", type = "slide", text = "ui_mcm_drx_da_title", size = {512, 50}, spacing = 20},
+        {id = "anomaly_amount_modifier", type = "track", val = 2, min = 0, max = 5, step = 0.2, def = 1},
+        {id = "max_artefacts_per_zone", type = "track", val = 2, min = 0, max = 3, step = 1, def = 2},
+        {id = "artefacts_spawn_chance", type = "track", val = 2, min = 0, max = 20, step = 1, def = 5},
+        {id = "debug_mode", type = "check", val = 1, def = false},
+    }
+}
+
+function on_mcm_load()
+    return op
+end

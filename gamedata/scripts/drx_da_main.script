@@ -1327,7 +1327,7 @@ function spawn_artefacts_on_level(level_name)
         for smart_name, _ in pairs(anomalies_by_smart) do
         	if is_not_empty(anomalies_by_smart[smart_name]) then
 	        	for i = 1, settings.max_artefacts_per_zone do
-	        		if random() <= settings.artefacts_spawn_chance then
+	        		if random(100) <= settings.artefacts_spawn_chance then
 			        	-- Choose an artefact to spawn:
 			        	local anomaly_type = updated_anomaly_levels[level_name].anomaly_types_by_smart[smart_name]
 			        	local picked_artefact = anomaly_type and
@@ -2293,6 +2293,7 @@ end
 -- Register callback scripts:
 function on_game_start()
 	RegisterScriptCallback("actor_on_before_hit", actor_on_before_hit)
+	RegisterScriptCallback("monster_on_before_hit", monster_on_before_hit)
 	RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
 	RegisterScriptCallback("npc_on_item_take", actor_on_item_take)
 	RegisterScriptCallback("actor_on_interaction", actor_on_interaction)

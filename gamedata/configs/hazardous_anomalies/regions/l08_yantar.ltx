@@ -1,7 +1,7 @@
 ;Determines the spawn percentage per each anomaly and max number of them
 [spawn_properties]
 spawn_percent = 0.5
-anomaly_max_number = 42
+anomaly_max_number = 30
 anomaly_max_active = 45 ; Unused
 
 ;Determines the range of anomaly radius
@@ -20,6 +20,7 @@ zone_mine_vortex
 zone_mine_mefistotel
 zone_mine_radar
 zone_mine_gold
+zone_mine_blast
 zone_field_radioactive_weak
 zone_field_radioactive_average
 zone_field_radioactive_strong
@@ -50,3 +51,8 @@ yan_smart_terrain_4_5
 ; yan_smart_terrain_5_5
 yan_smart_terrain_6_2
 yan_smart_terrain_snork_u
+
+;Determines the smarts around which anomalies will be created, with reduced amount (see script for how much)
+[available_smarts_reduced]
+yan_smart_terrain_5_3
+yan_smart_terrain_5_5

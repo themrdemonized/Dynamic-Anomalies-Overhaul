@@ -1,6 +1,6 @@
 ;Determines the spawn percentage per each anomaly and max number of them
 [spawn_properties]
-spawn_percent = 0.5
+spawn_percent = 0.3
 anomaly_max_number = 30
 anomaly_max_active = 38 ; Unused
 
@@ -14,7 +14,6 @@ max_radius = 3
 ;zone_mine_acid
 ;zone_mine_electra
 ;zone_mine_zharka
-zone_mine_flash
 zone_mine_blast
 zone_mine_vortex
 zone_mine_net
@@ -56,3 +55,7 @@ gar_smart_terrain_6_6
 gar_smart_terrain_6_7
 gar_smart_terrain_7_4
 gar_smart_terrain_8_5
+
+;Determines the smarts around which anomalies will be created, with reduced amount (see script for how much)
+[available_smarts_reduced]
+gar_smart_terrain_6_3

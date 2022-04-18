@@ -1330,7 +1330,7 @@ function spawn_artefact_on_smart(level_file, smart_name, picked_artefact, level_
     if pos then
 
     	-- Correct y position so the artefact wouldnt fall OOB
-    	pos = vector():set(pos.x, pos.y + 7, pos.z)
+    	pos = vector():set(pos.x, level_weathers.bLevelUnderground and pos.y + 1 or pos.y + 7, pos.z)
 
         -- Get the new level vertex id for the generated position:
         local lvid = level.vertex_id(pos)

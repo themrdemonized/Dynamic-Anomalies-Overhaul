@@ -2286,7 +2286,7 @@ function monster_on_before_hit(monster, s_hit, bone_id, flags)
 
 	local sec = s_hit.draftsman:section()
 	if anomalies_monster_hit_functions[sec] then
-		anomalies_monster_hit_functions[sec](s_hit, bone_id, flags, db.actor)
+		anomalies_monster_hit_functions[sec](monster, s_hit, bone_id, flags, db.actor)
 	end
 end
 

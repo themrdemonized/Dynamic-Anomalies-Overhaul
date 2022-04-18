@@ -2266,8 +2266,9 @@ anomalies_monster_hit_functions = {
 
 	-- Flash special hit behaviour - Time travel
 	zone_mine_flash = function(monster, s_hit, bone_id, flags, actor)
+		printf("flash got hit %s", monster:section())
 		flags.ret_value = false
-		alife_release(monster)
+		alife():release(alife():object(monster:id()))
 	end,
 
 }

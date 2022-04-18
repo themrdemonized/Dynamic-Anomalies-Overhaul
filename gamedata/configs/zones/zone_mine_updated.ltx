@@ -30,10 +30,10 @@ blowout_particles			= zones_mine\zone_acidic_mine_hit
 ;idle_small_particles			= zones_mine\zone_acidic_mine_idle
 ;idle_big_particles			= zones_mine\zone_acidic_mine_idle
 
-idle_sound					= anomaly\buzz_idle; bfuzz_blowout		;постоянный звук
-blowout_sound				= anomaly\buzz_hit; bfuzz_hit		;во время выброса(удара) в центре аномалии
-hit_sound					= anomaly\buzz_hit; bfuzz_hit		;на персонаже, когда тот получает хит
-entrance_sound				= anomaly\buzz_hit; bfuzz_hit		;при попадании объекта в аномалию
+idle_sound					= drx_da\drx_da_buzz_idle; bfuzz_blowout		;постоянный звук
+blowout_sound				= drx_da\drx_da_buzz_hit; bfuzz_hit		;во время выброса(удара) в центре аномалии
+hit_sound					= drx_da\drx_da_buzz_hit; bfuzz_hit		;на персонаже, когда тот получает хит
+entrance_sound				= drx_da\drx_da_buzz_hit; bfuzz_hit		;при попадании объекта в аномалию
 
 hit_type					= chemical_burn
 
@@ -104,10 +104,10 @@ idle_big_particles			= anomaly2\electra_damage_02_smoke
 entrance_small_particles	= anomaly2\electra_entrance_small
 entrance_big_particles		= anomaly2\emi_entrance_big_00
 
-idle_sound			= anomaly\electra_idle1; anomaly_gravy_idle
 blowout_sound		= anomaly\electra_blast1
-hit_sound			= anomaly\electra_hit
-entrance_sound		= anomaly\electra_hit
+idle_sound			= drx_da\drx_da_electra_idle1; anomaly_gravy_idle
+hit_sound			= drx_da\drx_da_electra_hit
+entrance_sound		= drx_da\drx_da_electra_hit
 
 blowout_light		= on
 light_color		    = 0.8,0.9,1
@@ -177,12 +177,12 @@ entrance_big_particles		= anomaly2\gravi_anomaly_00;
 tele_particles_small		= anomaly2\gravity_damage_01_smoke	;anomaly2\gravity_damage_01_smoke
 tele_particles_big			= anomaly2\gravity_damage_02_smoke
 
-idle_sound					= anomaly\gravi_idle01						;постоянный звук
-awake_sound					= anomaly\gravi_idle01
-accum_sound					= anomaly\gravi_idle01
+idle_sound					= drx_da\drx_da_gravi_idle01						;постоянный звук
+awake_sound					= drx_da\drx_da_gravi_idle01
+accum_sound					= drx_da\drx_da_gravi_idle01
 blowout_sound				= anomaly\anomaly_mincer_blowout; anomaly_gravy_blast01		;во время выброса(удара) в центре аномалии
-hit_sound					= anomaly\anomaly_gravy_hit1								;на персонаже, когда тот получает хит
-entrance_sound				= anomaly\anomaly_gravy_hit1 ;gravi_idle01										;при попадании объекта в аномалию
+hit_sound					= drx_da\drx_da_anomaly_gravy_hit1								;на персонаже, когда тот получает хит
+entrance_sound				= drx_da\drx_da_anomaly_gravy_hit1 ;gravi_idle01										;при попадании объекта в аномалию
 body_tearing_sound			= anomaly\anomaly_body_tear_1								;звук разрывания трупа
 
 hit_type					= strike
@@ -271,11 +271,11 @@ tele_particles_small		= anomaly2\gravity_damage_01_smoke	;anomaly2\gravity_damag
 tele_particles_big			= anomaly2\gravity_damage_02_smoke
 
 
-idle_sound			= anomaly\gravi_idle00							;постоянный звук
+idle_sound			= drx_da\drx_da_gravi_idle00							;постоянный звук
 blowout_sound		= anomaly\gravi_blowout6; anomaly_gravy_blast01	;во время выброса(удара) в центре аномалии
-hit_sound			= anomaly\anomaly_gravy_hit1						;на персонаже, когда тот получает хит
+hit_sound			= drx_da\drx_da_anomaly_gravy_hit1						;на персонаже, когда тот получает хит
 body_tearing_sound	= anomaly\anomaly_body_tear_1						;звук разрывания трупа
-entrance_sound		= anomaly\anomaly_gravy_hit1 ;gravi_idle01								;при попадании объекта в аномалию
+entrance_sound		= drx_da\drx_da_anomaly_gravy_hit1 ;gravi_idle01								;при попадании объекта в аномалию
 
 hit_type			= strike
 hit_impulse_scale	= 0.02;0.5;0.1			;соотношение физического импульса и силы хита
@@ -363,10 +363,10 @@ idle_big_particles			= anomaly2\gravity_damage_02_smoke
 entrance_small_particles	= anomaly2\gravi_anomaly_shield_00
 entrance_big_particles		= anomaly2\gravity_entrance_big
 
-idle_sound			= anomaly\gravi_rumble1; ambient\fx2		;постоянный звук
+idle_sound			= drx_da\drx_da_gravi_rumble1; ambient\fx2		;постоянный звук
 blowout_sound		= anomaly\anomaly_gravy_blast1; anomaly_gravy_blast01	;во время выброса(удара) в центре аномалии
-hit_sound			= anomaly\anomaly_gravy_hit1								;на персонаже, когда тот получает хит
-entrance_sound		= anomaly\anomaly_gravy_hit1								;при попадании объекта в аномалию
+hit_sound			= drx_da\drx_da_anomaly_gravy_hit1								;на персонаже, когда тот получает хит
+entrance_sound		= drx_da\drx_da_anomaly_gravy_hit1								;при попадании объекта в аномалию
 
 
 awaking_time		= 50;100
@@ -440,7 +440,7 @@ idle_big_particles			= damage_fx\burn_creatures00
 
 idle_particles_dont_stop	= true;
 
-idle_sound			= anomaly\fire_idle
+idle_sound			= drx_da\drx_da_fire_idle
 blowout_sound		= anomaly\zhar_blow
 hit_sound			= ambient\zhar
 entrance_sound		= ambient\zhar

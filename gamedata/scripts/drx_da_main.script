@@ -1080,7 +1080,7 @@ function drx_da_spawn_anomalies_on_level(level_name)
     	local available_smarts_reduced = updated_anomaly_levels[level_name].available_smarts_reduced or {}
 
         for i, smart_name in pairs(smart_list) do
-        	if (true or not smart_restrictions[smart_name]) then
+        	if (true or not smart_restrictions[smart_name]) and random() <= settings.anomaly_zone_spawn_chance then
 	        	-- Choose an anomaly type to spawn:
 			    local anomaly_list = collect_section(level_file, "anomaly_types")
 			    if anomaly_list and #anomaly_list >= 1 then

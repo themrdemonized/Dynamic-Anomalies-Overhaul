@@ -1238,9 +1238,9 @@ function drx_da_generate_position(smart_name)
     end
 
     -- Get maximum offset values:
-    local max_offset_x = (ini:r_float_ex("location_offset", "max_offset_x") or 35)
+    local max_offset_x = (ini:r_float_ex("location_offset", "max_offset_x") or 40)
     local max_offset_y = (ini:r_float_ex("location_offset", "max_offset_y") or 0)
-    local max_offset_z = (ini:r_float_ex("location_offset", "max_offset_z") or 35)
+    local max_offset_z = (ini:r_float_ex("location_offset", "max_offset_z") or 40)
     local num_tries = (ini:r_float_ex("location_offset", "max_tries") or 64)
 
     -- Reduce offset by 2 times for underground
@@ -1256,21 +1256,21 @@ function drx_da_generate_position(smart_name)
     while ((valid_lvid ~= true) and (num_tries > 0)) do
 
         -- Randomly offset anomaly x-position from center of smart terrain:
-        local offset_x = (max_offset_x * math.random()) + 0.3
+        local offset_x = (max_offset_x * math.random()) + 0.5
         if (math.random() <= 0.5) then
             offset_x = -(offset_x)
         end
         local pos_x = (smart.position.x + offset_x)
 
         -- Randomly offset anomaly y-position from center of smart terrain:
-        local offset_y = (max_offset_y * math.random()) + 0.3
+        local offset_y = (max_offset_y * math.random())
         if (math.random() <= 0.5) then
             offset_y = -(offset_y)
         end
         local pos_y = (smart.position.y + offset_y)
 
         -- Randomly offset anomaly z-position from center of smart terrain:
-        local offset_z = (max_offset_z * math.random()) + 0.3
+        local offset_z = (max_offset_z * math.random()) + 0.5
         if (math.random() <= 0.5) then
             offset_z = -(offset_z)
         end
@@ -1670,7 +1670,7 @@ local anomalies_vars = {
 -- Defined radius of anomalies behaviour
 anomalies_near_actor_radii = {
 	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4,
-	zone_mine_gold = anomaly_radii.zone_mine_gold.max * 3
+	zone_mine_gold = anomaly_radii.zone_mine_gold.max * anomaly_radii.zone_mine_gold.max
 }
 
 -- Special anomalies behaviour if the actor is near an anomaly
@@ -1682,7 +1682,7 @@ anomalies_near_actor_functions = {
 		if time_elapsed < anomaly.spawn_time then return end
 
 		local spawn_chance = 5
-		local spawn_cooldown = 90
+		local spawn_cooldown = 180
 		local spawn_max_amount = 3
 		local spawn_table = {
 			"m_poltergeist_normal_tele",
@@ -1693,7 +1693,7 @@ anomalies_near_actor_functions = {
 
 		if math.random() * 100 <= 1 then
 			anomaly.spawn_time = time_elapsed + spawn_cooldown
-			for i = 1, math.random(spawn_max_amount) do
+			for i = 1, math.ceil(math.random() ^ 2 * spawn_max_amount) do
 				local actor_position = actor:position()
 				local spawn_position = vector():set(actor_position.x - random_float(5, 7), actor_position.y, actor_position.z - random_float(5, 7))
 				local spawn_section = spawn_table[math.random(#spawn_table)]

@@ -1,5 +1,45 @@
 <?xml version="1.0" encoding="windows-1251" ?>
 <string_table>
+
+	<string id="zone_mine_radar_section_name">
+		<text>Radar</text>
+	</string>
+	
+	<string id="zone_mine_darkness_section_name">
+		<text>Darkness</text>
+	</string>
+	
+	<string id="zone_mine_flash_section_name">
+		<text>Flash</text>
+	</string>
+	
+	<string id="zone_mine_ghost_section_name">
+		<text>Ghost</text>
+	</string>
+	
+	<string id="zone_mine_gold_section_name">
+		<text>Liquid Gold</text>
+	</string>
+	
+	<string id="zone_mine_green_dragon_section_name">
+		<text>Green Dragon</text>
+	</string>
+	
+	<string id="zone_mine_mefistotel_section_name">
+		<text>Mephistopheles</text>
+	</string>
+	
+	<string id="zone_mine_net_section_name">
+		<text>Net</text>
+	</string>
+	
+	<string id="zone_mine_point_section_name">
+		<text>Ball Lightning</text>
+	</string>
+	
+	<string id="zone_mine_sphere_section_name">
+		<text>Press</text>
+	</string>
 	
 	<string id="encyclopedia_anomalies_radar">
 		<text>Radar</text>

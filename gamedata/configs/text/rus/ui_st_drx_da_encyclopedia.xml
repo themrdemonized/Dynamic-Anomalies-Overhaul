@@ -1,10 +1,50 @@
 <?xml version="1.0" encoding="windows-1251" ?>
 <string_table>
-	
-	<string id="encyclopedia_anomalies_radar">
+
+	<string id="zone_mine_radar_section_name">
 		<text>«Радар»</text>
 	</string>
-	<string id="encyclopedia_anomalies_radar_text">
+	
+	<string id="zone_mine_darkness_section_name">
+		<text>«Тьма»</text>
+	</string>
+	
+	<string id="zone_mine_flash_section_name">
+		<text>«Вспышка»</text>
+	</string>
+	
+	<string id="zone_mine_ghost_section_name">
+		<text>«Призрак»</text>
+	</string>
+	
+	<string id="zone_mine_gold_section_name">
+		<text>«Жидкое золото»</text>
+	</string>
+	
+	<string id="zone_mine_green_dragon_section_name">
+		<text>«Зеленый Дракон»</text>
+	</string>
+	
+	<string id="zone_mine_mefistotel_section_name">
+		<text>«Мефистофель»</text>
+	</string>
+	
+	<string id="zone_mine_net_section_name">
+		<text>«Сеть»</text>
+	</string>
+	
+	<string id="zone_mine_point_section_name">
+		<text>«Шаровая молния»</text>
+	</string>
+	
+	<string id="zone_mine_sphere_section_name">
+		<text>«Давилка»</text>
+	</string>
+	
+	<string id="zone_mine_radar_section_name">
+		<text>«Радар»</text>
+	</string>
+	<string id="zone_mine_radar_text_section_name">
 		<text>
 			• Название: %c[d_cyan]Радар%c[ui_gray_1]
 			\n• Тип: %c[d_orange]Пси-аномалия%c[ui_gray_1]

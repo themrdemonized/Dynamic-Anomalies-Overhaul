@@ -116,9 +116,9 @@ local add_speed = speed.add_speed
 local remove_speed = speed.remove_speed
 
 local og_printf = printf
-local function printf(...)
+local function printf(str, ...)
 	if settings.debug_mode then
-		og_printf(...)
+		og_printf("DRX DA: " .. str, ...)
 	end
 end
 
@@ -166,7 +166,7 @@ end
 local get_safe_sound_object = xr_sound.get_safe_sound_object
 local function play_sound_on_actor(snd, volume, frequency)
 	if not snd then
-		printf("DRX DA snd is nil")
+		printf("snd is nil")
 		return
 	end
 	local actor = db.actor
@@ -557,12 +557,12 @@ function get_obj_restrictions(clean)
 				if true or se_obj_level == level_name then
 					local monster_data = get_monster_data(se_obj)
 					if monster_data then
-						-- printf("DRX DA .")
-						-- printf("DRX DA monster_data for %s, %s, level %s", se_obj:section_name(), se_obj.id, se_obj_level)
+						-- printf(".")
+						-- printf("monster_data for %s, %s, level %s", se_obj:section_name(), se_obj.id, se_obj_level)
 						for k, v in spairs(restrictions) do
-							-- printf("DRX DA [%s] => %s", k, v)
+							-- printf("[%s] => %s", k, v)
 							if monster_data[k] and type(monster_data[k]) == "table" then
-								-- printf("DRX DA ..")
+								-- printf("..")
 								for k1, v1 in spairs(monster_data[k]) do
 									if not obj_restrictions[se_obj.id] then obj_restrictions[se_obj.id] = {} end
 									if not obj_restrictions[se_obj.id][k] then obj_restrictions[se_obj.id][k] = {} end
@@ -573,7 +573,7 @@ function get_obj_restrictions(clean)
 										-- printf("%s",  nearest_smart_name)
 										smart_restrictions[nearest_smart_name] = v1
 									end
-									-- printf("DRX DA     [%s] => %s", k1, v1)
+									-- printf("[%s] => %s", k1, v1)
 								end
 							end
 						end
@@ -653,7 +653,7 @@ function remove_all_restrictions(level_name)
 	-- for i = 1, 65534 do
 	-- 	local obj = level.object_by_id(i)
 	-- 	if obj and obj ~= 0 and IsMonster(obj) then
-	-- 		printf("DRX DA removing restrictions for %s, %s", obj:section(), i)
+	-- 		printf("removing restrictions for %s, %s", obj:section(), i)
 	-- 		obj:remove_all_restrictions()
 	-- 	end
 	-- end
@@ -664,12 +664,12 @@ function get_anomaly_obj(id, level_name)
 	local obj = alife():object(id)
 
 	if not obj or obj == 0 or obj.id == 0 then
-		-- printf("DRX DA Error, anomaly game object not found by id %s, level %s", id, level_name)
+		-- printf("Error, anomaly game object not found by id %s, level %s", id, level_name)
 		return
 	end
 
 	if not IsAnomaly(_, obj:clsid()) then
-		-- printf("DRX DA Error, object is not an anomaly, %s, %s, on level %s", obj:section_name(), obj.id, level_name)
+		-- printf("Error, object is not an anomaly, %s, %s, on level %s", obj:section_name(), obj.id, level_name)
 		return
 	end
 
@@ -679,7 +679,7 @@ function get_anomaly_obj(id, level_name)
 	local gg_vertex = gg.vertex
 	local obj_level = sim_level_name(sim, gg_vertex(gg, obj.m_game_vertex_id):level_id())
 	if obj_level ~= level_name then
-		-- printf("DRX DA Error, anomaly game object found by id %s but on different level %s, requested level %s", id, obj_level, level_name)
+		-- printf("Error, anomaly game object found by id %s but on different level %s, requested level %s", id, obj_level, level_name)
 		return
 	end
 
@@ -703,7 +703,7 @@ function get_anomalies_by_smart(level_name)
 			if se_obj then
 				for smart_name, smart in pairs(SIMBOARD.smarts_by_names) do
 					if smart and smart.m_game_vertex_id == se_obj.m_game_vertex_id then
-						printf("DRX DA adding anomaly %s to smart %s", se_obj:section_name(), smart_name)
+						printf("adding anomaly %s to smart %s", se_obj:section_name(), smart_name)
 						if not updated_anomaly_levels[level_name].anomalies_by_smart then
 							updated_anomaly_levels[level_name].anomalies_by_smart = {}
 						end
@@ -734,7 +734,7 @@ function disable_anomaly_obj(id, level_name)
 	if obj then
 		local g_obj = level.object_by_id(id)
 		if g_obj and g_obj ~= 0 and g_obj:id() ~= 0 then
-			printf("DRX DA disabling anomaly %s, %s, level %s", g_obj:section(), g_obj:id(), level_name)
+			printf("disabling anomaly %s, %s, level %s", g_obj:section(), g_obj:id(), level_name)
 			g_obj:disable_anomaly()
 		end
 	end
@@ -750,7 +750,7 @@ end
 function enable_anomaly_obj(id, level_name)
 	local obj = get_anomaly_obj(id, level_name)
 	if obj then
-		printf("DRX DA enabling anomaly %s, %s, level %s", obj:section(), obj:id(), level_name)
+		printf("enabling anomaly %s, %s, level %s", obj:section(), obj:id(), level_name)
 		obj:enable_anomaly()
 	end
 end
@@ -766,11 +766,11 @@ function remove_anomaly_obj(id, level_name)
 	local obj = get_anomaly_obj(id, level_name)
 	if obj then
 		if not IsAnomaly(_, obj:clsid()) then
-			printf("DRX DA Error, object is not an anomaly, %s, %s, on level %s", obj:section_name(), obj.id, level_name)
+			printf("Error, object is not an anomaly, %s, %s, on level %s", obj:section_name(), obj.id, level_name)
 			return
 		end
 
-		printf("DRX DA removing anomaly object %s, %s, on level %s", obj:section_name(), obj.id, level_name)
+		printf("removing anomaly object %s, %s, on level %s", obj:section_name(), obj.id, level_name)
 		-- obj:disable_anomaly()
 		
 		
@@ -812,7 +812,7 @@ function clean_old_dynamic_anomalies_on_level(level_name)
 						if not in_restrictions[anom_id] then
 							remove_anomaly_obj(anom_id, level_name)
 						else
-							printf("DRX DA Error, can't remove old anomaly %s, level %s, in restriction", anom_id, level_name)
+							printf("Error, can't remove old anomaly %s, level %s, in restriction", anom_id, level_name)
 							fully_cleaned = false
 						end
 					end
@@ -821,7 +821,7 @@ function clean_old_dynamic_anomalies_on_level(level_name)
 		end
 		updated_anomaly_levels[level_name].cleaned_old_anomalies = fully_cleaned
 	else
-		printf("DRX DA old anomalies already cleaned on level %s", level_name)
+		printf("old anomalies already cleaned on level %s", level_name)
 	end
 end
 
@@ -829,7 +829,7 @@ end
 function clean_dynamic_anomalies_on_level_func(level_name)
 	local t = updated_anomaly_levels[level_name]
 	if not t then
-		printf("DRX DA Error, updated_anomaly_levels table not found for %s", level_name)
+		printf("Error, updated_anomaly_levels table not found for %s", level_name)
 		return
 	end
 
@@ -850,12 +850,12 @@ function clean_dynamic_anomalies_on_level_func(level_name)
 			updated_anomaly_levels[level_name].anomalies_properties[t[i]] = nil
 			t[i] = nil
 		else
-			printf("DRX DA Error, can't remove anomaly %s, level %s, in restriction", t[i], level_name)
+			printf("Error, can't remove anomaly %s, level %s, in restriction", t[i], level_name)
 		end
 	end
 
 	clean_old_dynamic_anomalies_on_level(level_name)
-	printf("DRX DA Anomalies cleaned on level %s", level_name)
+	printf("Anomalies cleaned on level %s", level_name)
 end
 
 function clean_dynamic_anomalies_on_level(level_name, dont_clean_restrictions)
@@ -903,11 +903,11 @@ function clean_dynamic_anomalies_global()
 					local se_obj = sim_object(sim, v1)
 					if se_obj then
 						if IsAnomaly(_, se_obj:clsid()) then
-							printf("DRX DA Deleting anomaly %s, %s globally, level %s", se_obj:section_name(), v1, k)
+							printf("Deleting anomaly %s, %s globally, level %s", se_obj:section_name(), v1, k)
 							alife_record(se_obj, false)
 							sim_release(sim, se_obj, false)
 						else
-							printf("DRX DA Error, object is not an anomaly, %s, %s, on level %s", se_obj:section_name(), v1, k)
+							printf("Error, object is not an anomaly, %s, %s, on level %s", se_obj:section_name(), v1, k)
 						end
 					end
 
@@ -923,7 +923,7 @@ function clean_dynamic_anomalies_global()
 					v.anomalies_properties[v1] = nil
 					v.anomalies[k1] = nil
 				else
-					printf("DRX DA can't delete anomaly %s globally, level %s, in restriction", v1, k)
+					printf("can't delete anomaly %s globally, level %s, in restriction", v1, k)
 				end
 			end
 
@@ -940,7 +940,7 @@ function clean_dynamic_anomalies_global()
 								if not in_restrictions[anom_id] then
 									alife_release_id(anom_id)
 								else
-									printf("DRX DA Error, can't remove old anomaly %s, level %s, in restriction", anom_id, k)
+									printf("Error, can't remove old anomaly %s, level %s, in restriction", anom_id, k)
 									fully_cleaned = false
 								end
 							end
@@ -949,18 +949,18 @@ function clean_dynamic_anomalies_global()
 				end
 				v.cleaned_old_anomalies = fully_cleaned
 			else
-				printf("DRX DA old anomalies already cleaned on level %s", k)
+				printf("old anomalies already cleaned on level %s", k)
 			end
 		end
 	end
-	printf("DRX DA Cleaned dynamic anomalies globally")
+	printf("Cleaned dynamic anomalies globally")
 end
 
 function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name)
 	-- Get the smart terrain:
     local smart = SIMBOARD.smarts_by_names[smart_name]
     if not smart then
-        printf("DRX DA Error: Unable to create dynamic anomaly field for %s, the specified smart location does not exist", smart_name)
+        printf("Error: Unable to create dynamic anomaly field for %s, the specified smart location does not exist", smart_name)
         return false
     end
 
@@ -976,11 +976,11 @@ function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, lev
 
         -- Return the anomaly id:
         if anom_id then
-        	printf("DRX DA: Dynamic anomaly field %s spawned at %s, level %s", anomaly_type, smart_name, level_name)
+        	printf("Dynamic anomaly field %s spawned at %s, level %s", anomaly_type, smart_name, level_name)
         	return anom_id
         end
     else
-    	printf("DRX DA Error: failed to generate position")
+    	printf("Error: failed to generate position")
     end
 end
 
@@ -988,28 +988,28 @@ function get_level_data(level_name)
 	local level_file_name = "hazardous_anomalies\\regions\\" .. level_name .. ".ltx"
     local level_file = ini_file(level_file_name)
     if not level_file then
-    	printf("DRX DA, ltx file not found: %s", level_file_name)
+    	printf("ltx file not found: %s", level_file_name)
     	return false
     end
 
     -- Get the percent chance for anomalies to spawn:
     local spawn_percent = level_file:r_float_ex("spawn_properties", "spawn_percent") or 0
     if not spawn_percent or spawn_percent <= 0 then
-        printf("DRX DA: Dynamic anomalies not spawned, spawn chance is 0")
+        printf("Dynamic anomalies not spawned, spawn chance is 0")
         return false
     end
 
     -- Determine the maximum amount of anomalies spawned in each anomaly field:
     local anomaly_max_number = level_file:r_float_ex("spawn_properties", "anomaly_max_number") or 0
     if not anomaly_max_number or anomaly_max_number < 1 then
-        printf("DRX DA: Dynamic anomalies not spawned, max anomaly count is 0")
+        printf("Dynamic anomalies not spawned, max anomaly count is 0")
         return false
     end
 
     -- Determine the maximum amount of anomalies active in each anomaly field:
     local anomaly_max_active = level_file:r_float_ex("spawn_properties", "anomaly_max_active") or 0
     if not anomaly_max_active or anomaly_max_active < 1 then
-        printf("DRX DA: Dynamic anomalies not spawned, max active count is 0")
+        printf("Dynamic anomalies not spawned, max active count is 0")
         return false
     end
 
@@ -1032,7 +1032,7 @@ end
 function drx_da_spawn_anomalies_on_level(level_name)
 	local level_data = get_level_data(level_name)
 	if not level_data then
-		printf("DRX DA Error, unable to get data for %s", level_name)
+		printf("Error, unable to get data for %s", level_name)
 		return
 	end
 
@@ -1041,14 +1041,23 @@ function drx_da_spawn_anomalies_on_level(level_name)
 	local anomaly_max_number = level_data.anomaly_max_number * settings.anomaly_amount_modifier
 	local anomaly_max_active = level_data.anomaly_max_active
 
+	local pairs = pairs
+    local collect_section = utils_data.collect_section
+    local size_table = size_table
+    local random = math.random
+	local invert_table = invert_table
+	local is_not_empty = is_not_empty
+	local is_empty = is_empty
+	local table_remove = table.remove
+
     -- Build a list of available smart terrains:
-    local smart_list = utils_data.collect_section(level_file, "available_smarts")
+    local smart_list = collect_section(level_file, "available_smarts")
 
     if is_not_empty(smart_list) then
 	    if reduced_chance_levels[level_name] then
 	    	local t = {}
 	    	for k, v in pairs(smart_list) do
-	    		if math.random(100) <= 50 then
+	    		if random(100) <= 50 then
 	    			t[#t + 1] = v
 	    		end
 	    	end
@@ -1057,7 +1066,7 @@ function drx_da_spawn_anomalies_on_level(level_name)
 	end
 
 	-- Build a list of available smart terrains with reduced amount:
-	local smart_list_reduced = utils_data.collect_section(level_file, "available_smarts_reduced")
+	local smart_list_reduced = collect_section(level_file, "available_smarts_reduced")
 	if is_not_empty(smart_list_reduced) then
 		smart_list_reduced = invert_table(smart_list_reduced)
 		for k, v in pairs(smart_list_reduced) do
@@ -1065,10 +1074,33 @@ function drx_da_spawn_anomalies_on_level(level_name)
 		end
 	end
 
-    local pairs = pairs
-    local collect_section = utils_data.collect_section
-    local size_table = size_table
-    local random = math.random
+	-- Build a list of available anomalies:
+    local anomaly_list = collect_section(level_file, "anomaly_types")
+    if settings.disable_new_anomalies then
+    	local t = {}
+    	for _, v in pairs(anomaly_list) do
+    		if not drx_da_main_mcm.new_anomalies_sections[v] then
+    			t[#t + 1] = v
+    		else
+    			printf("disable all new anomalies, found section %s", v)
+    		end
+    	end
+    	anomaly_list = t
+    else
+    	local t = {}
+    	for k, v in pairs(anomaly_list) do
+    		if drx_da_main_mcm.new_anomalies_sections[v] then
+    			if drx_da_main_mcm.is_enabled_anomaly(v) then
+    				t[#t + 1] = v
+    			else
+    				printf("anomaly %s is not enabled", v)
+    			end
+    		else
+    			t[#t + 1] = v
+    		end
+    	end
+    	anomaly_list = t
+    end
 
     -- Build anomalies table
     if is_not_empty(smart_list) then
@@ -1082,10 +1114,9 @@ function drx_da_spawn_anomalies_on_level(level_name)
         for i, smart_name in pairs(smart_list) do
         	if (true or not smart_restrictions[smart_name]) and random() <= settings.anomaly_zone_spawn_chance then
 	        	-- Choose an anomaly type to spawn:
-			    local anomaly_list = collect_section(level_file, "anomaly_types")
 			    if anomaly_list and #anomaly_list >= 1 then
 			    	local anomaly_type = anomaly_list[random(#anomaly_list)]
-			    	printf("DRX DA picked anomaly type %s", anomaly_type)
+			    	printf("picked anomaly type %s", anomaly_type)
 
 			    	if not anomalies_by_smart[smart_name] then anomalies_by_smart[smart_name] = {} end
 		        	local j = size_table(anomalies_by_smart[smart_name])
@@ -1104,10 +1135,10 @@ function drx_da_spawn_anomalies_on_level(level_name)
 		        		j = j + 1
 		        	end
 			    else
-			    	printf("DRX DA: No dynamic anomaly types specified for level %s", level_name)
+			    	printf("No dynamic anomaly types specified for level %s", level_name)
 			    end
 			else
-				printf("DRX DA: no anomalies spawn on smart %s, level %s in restriction", smart_name, level_name)
+				printf("no anomalies spawn on smart %s, level %s in restriction", smart_name, level_name)
 			end
         end
         return #anomalies > 0
@@ -1152,7 +1183,7 @@ function drx_da_spawn_anomaly(anom_type, pos, lvid, gvid, level_file)
 		CreateTimeEvent("drx_da_abort_creation" .. se_obj_id, "drx_da_abort_creation" .. se_obj_id, 0.2, function()
 			local obj = alife():object(se_obj_id)
 			if obj then
-				printf("DRX DA Error, anomaly %s failed to spawn correctly, releasing", anom_type)
+				printf("Error, anomaly %s failed to spawn correctly, releasing", anom_type)
 				alife():release(obj)
 			end
 			return true
@@ -1165,14 +1196,14 @@ function drx_da_spawn_anomaly(anom_type, pos, lvid, gvid, level_file)
     -- Spawn the anomaly:
     local se_obj = alife():create(anom_type, pos, lvid, gvid)
     if (not se_obj) then
-        printf("DRX DA Error: Unable to spawn dynamic anomaly")
+        printf("Error: Unable to spawn dynamic anomaly")
         return
     end
 
     -- Set anomaly properties:
     local data = utils_stpk.get_anom_zone_data(se_obj)
     if (not data) then
-        printf("DRX DA Error: Unable to set dynamic anomaly properties")
+        printf("Error: Unable to set dynamic anomaly properties")
         abort_creation(se_obj.id, anom_type)
         return
     end
@@ -1233,7 +1264,7 @@ function drx_da_generate_position(smart_name)
     -- Get the smart terrain:
     local smart = SIMBOARD.smarts_by_names[smart_name]
     if (not smart) then
-        printf("DRX DA Error: Unable to generate positional data, specified smart location does not exist")
+        printf("Error: Unable to generate positional data, specified smart location does not exist")
         return
     end
 
@@ -1287,7 +1318,7 @@ function drx_da_generate_position(smart_name)
         -- Decrement the number of tries left:
         num_tries = (num_tries - 1)
         if ((num_tries <= 0) and (valid_lvid ~= true)) then
-            printf("DRX DA Error: Unable to generate valid lvid pos, aborting")
+            printf("Error: Unable to generate valid lvid pos, aborting")
             return
         end
     end
@@ -1303,7 +1334,7 @@ function clean_artefacts_on_level(level_name)
 	if is_not_empty(artefacts) then
 		for k, v in pairs(artefacts) do
 			alife_release_id(k)
-			printf("DRX DA releasing artefact %s, sec %s, level_name %s", k, v, level_name)
+			printf("releasing artefact %s, sec %s, level_name %s", k, v, level_name)
 			artefacts[k] = nil
 		end
 	end
@@ -1314,14 +1345,14 @@ function spawn_artefact_on_smart(level_file, smart_name, picked_artefact, level_
 	local level_name = level_name or level.name()
 
 	if not picked_artefact then
-		printf("DRX DA Error: Unable to create artefact %s, is nil", picked_artefact)
+		printf("Error: Unable to create artefact %s, is nil", picked_artefact)
         return false
     end
 
 	-- Get the smart terrain:
     local smart = SIMBOARD.smarts_by_names[smart_name]
     if not smart then
-        printf("DRX DA Error: Unable to create artefact for %s, the specified smart location does not exist", smart_name)
+        printf("Error: Unable to create artefact for %s, the specified smart location does not exist", smart_name)
         return false
     end
 
@@ -1340,11 +1371,11 @@ function spawn_artefact_on_smart(level_file, smart_name, picked_artefact, level_
 
         -- Return the anomaly id:
         if artefact then
-        	printf("DRX DA: Artefact %s, id %s spawned at %s, level %s", picked_artefact, artefact.id, smart_name, level_name)
+        	printf("Artefact %s, id %s spawned at %s, level %s", picked_artefact, artefact.id, smart_name, level_name)
         	return artefact.id
         end
     else
-    	printf("DRX DA Error: failed to generate position")
+    	printf("Error: failed to generate position")
     end
 end
 
@@ -1354,7 +1385,7 @@ function spawn_artefacts_on_level(level_name)
 
 	local level_data = get_level_data(level_name)
 	if not level_data then
-		printf("DRX DA Error, unable to get data for %s", level_name)
+		printf("Error, unable to get data for %s", level_name)
 		return
 	end
 
@@ -1401,12 +1432,12 @@ function spawn_artefacts_on_level(level_name)
 					        end
 			        	end
 
-			        	printf("DRX DA picked artefact to spawn %s, anomaly_type %s, smart %s level %s", picked_artefact, anomaly_type, smart_name, level_name)
+			        	printf("picked artefact to spawn %s, anomaly_type %s, smart %s level %s", picked_artefact, anomaly_type, smart_name, level_name)
 			        	local artefact_id = spawn_artefact_on_smart(level_file, smart_name, picked_artefact, level_name)
 			        	if artefact_id then
 			        		artefacts[artefact_id] = picked_artefact
 			        	else
-			        		printf("DRX DA error, unabled to spawn artefact %s, anomaly_type %s, smart %s level %s", picked_artefact, anomaly_type, smart_name, level_name)
+			        		printf("error, unabled to spawn artefact %s, anomaly_type %s, smart %s level %s", picked_artefact, anomaly_type, smart_name, level_name)
 			        	end
 					end
 				end
@@ -1421,14 +1452,14 @@ function drx_da_update_dynamic_anomalies(force)
 
     -- Verify db.actor is available:
     if not db.actor then
-        printf("DRX DA Error: Cannot update anomalies, db.actor not available")
+        printf("Error: Cannot update anomalies, db.actor not available")
         return false
     end
 
     -- Get surge manager:
     local surgeman = surge_manager.get_surge_manager()
     if not surgeman then
-        printf("DRX DA Error: Cannot update anomalies, surge manager not available")
+        printf("Error: Cannot update anomalies, surge manager not available")
         return false
     end
 
@@ -1441,12 +1472,12 @@ function drx_da_update_dynamic_anomalies(force)
     	CreateTimeEvent("drx_da_spawn_anomalies_on_level", "drx_da_spawn_anomalies_on_level", 0.6, function()
 			local anomalies = drx_da_spawn_anomalies_on_level(level_name)
 	    	if not anomalies then
-	    		printf("DRX DA Error, failed to spawn anomalies")
+	    		printf("Error, failed to spawn anomalies")
 	    		build_anomalies_pos_tree()
 	    		return true
 	    	end
 
-	    	printf("DRX DA, updated anomalies on level %s", level_name)
+	    	printf("updated anomalies on level %s", level_name)
 	    	updated_anomaly_levels[level_name].time = last_surge_time
 	    	build_anomalies_pos_tree()
 	    	register_anomalies_behaviour()
@@ -1454,7 +1485,7 @@ function drx_da_update_dynamic_anomalies(force)
 	    	return true
     	end)
     else
-    	printf("DRX DA, anomalies not updated on level %s, no emission happened, last_surge_time %s, level update time %s", level_name, last_surge_time, updated_anomaly_levels[level_name].time)
+    	printf("anomalies not updated on level %s, no emission happened, last_surge_time %s, level update time %s", level_name, last_surge_time, updated_anomaly_levels[level_name].time)
     	register_anomalies_behaviour()
     end
 
@@ -1475,9 +1506,9 @@ function drx_da_actor_on_update_callback()
     get_actor_psy_table()
     init_anomaly_table_global(level.name())
 
-    printf("DRX DA, saved level %s, current level %s", level.name(), alife_storage_manager.get_state().drx_da_previous_level)
+    printf("saved level %s, current level %s", level.name(), alife_storage_manager.get_state().drx_da_previous_level)
 	if level.name() == alife_storage_manager.get_state().drx_da_previous_level then
-		printf("DRX DA, on the same level, only register behaviour")
+		printf("on the same level, only register behaviour")
 		register_anomalies_behaviour()
 		unregister_drx_da()
 		build_anomalies_pos_tree()
@@ -1495,7 +1526,7 @@ function drx_da_actor_on_update_callback()
 end
 
 function unregister_drx_da()
-	printf("DRX DA anomalies updated, unregistering")
+	printf("anomalies updated, unregistering")
 	UnregisterScriptCallback("actor_on_update", drx_da_actor_on_update_callback)
 end
 
@@ -1511,7 +1542,7 @@ anomalies_do_not_register_behaviour = {
 function register_anomalies_behaviour()
 	local level_name = level.name()
 	if is_empty(updated_anomaly_levels[level_name]) or is_empty(updated_anomaly_levels[level_name].anomalies) then
-	 	printf("DRX DA anomalies, anomalies not found for level %s", level_name)
+	 	printf("anomalies, anomalies not found for level %s", level_name)
 	 	return
 	end
 
@@ -1523,7 +1554,7 @@ function register_anomalies_behaviour()
 		end
 	end
 
-	printf("DRX DA anomalies, turning on behaviour for level %s", level_name)
+	printf("anomalies, turning on behaviour for level %s", level_name)
 
 	for k, v in pairs(updated_anomaly_levels[level_name].anomalies_properties) do
 		v.update_time = time_global()
@@ -1536,7 +1567,7 @@ function register_anomalies_behaviour()
 		local t = time_global()
 
 		-- if is_empty(props) then
-		-- 	printf("DRX DA Error, anomaly behaviour not found for %s, level %s", id, level_name)
+		-- 	printf("Error, anomaly behaviour not found for %s, level %s", id, level_name)
 		-- 	return true
 		-- end
 
@@ -1548,14 +1579,14 @@ function register_anomalies_behaviour()
 
 		if props.active then
 			if t - props.update_time > props.time_active then
-				-- printf("DRX DA anomaly disabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
+				-- printf("anomaly disabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
 				props.update_time = t
 				props.active = false
 				obj:disable_anomaly()
 			end
 		else
 			if t - props.update_time > props.time_cooldown then
-				-- printf("DRX DA anomaly enabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
+				-- printf("anomaly enabled, id %s, i %s, t %s, u %s", id, i, t, props.update_time)
 				props.update_time = t
 				props.active = true
 				obj:enable_anomaly()
@@ -1689,7 +1720,7 @@ anomalies_near_actor_functions = {
 			"m_poltergeist_normal_flame",
 		}
 
-		printf("DRX DA, trying to spawn poltergeist")
+		printf("trying to spawn poltergeist")
 
 		if math.random() * 100 <= 1 then
 			anomaly.spawn_time = time_elapsed + spawn_cooldown
@@ -2132,7 +2163,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 			open_anomaly_article(section)
 			if anomalies_near_actor_functions[section] then anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr) end
 
-			-- printf("DRX DA, actor near anomaly %s, firing effect, delta %s", section, delta)
+			-- printf("actor near anomaly %s, firing effect, delta %s", section, delta)
 		end
 	end
 end
@@ -2157,16 +2188,16 @@ function actor_on_interaction(typ, obj, name)
 			CreateTimeEvent("clean_dynamic_anomalies_global", "clean_dynamic_anomalies_global", 0.5, function()
 				last_surge_time = get_time_elapsed()
 
-				printf("DRX DA surge happened globally at %s", last_surge_time)
-				printf("DRX DA update on level %s after emission", level.name())
+				printf("surge happened globally at %s", last_surge_time)
+				printf("update on level %s after emission", level.name())
 
 				clean_dynamic_anomalies_global()
 				build_anomalies_pos_tree()
 				return true
 			end)
 		else
-			printf("DRX DA surge happened globally at %s", get_time_elapsed())
-			printf("DRX DA update artefacts on level %s after emission", level.name())
+			printf("surge happened globally at %s", get_time_elapsed())
+			printf("update artefacts on level %s after emission", level.name())
 			clean_artefacts_on_level(level.name())
 			spawn_artefacts_on_level(level.name())
 			build_anomalies_pos_tree()
@@ -2178,7 +2209,7 @@ function actor_on_item_take(obj)
 	local level_name = level.name()
 	local id = obj:id()
 	if updated_anomaly_levels[level_name] and updated_anomaly_levels[level_name].artefacts and updated_anomaly_levels[level_name].artefacts[id] then
-		printf("DRX DA, taken created artefact %s, id %s, level_name %s", updated_anomaly_levels[level_name].artefacts[id], id, level_name)
+		printf("taken created artefact %s, id %s, level_name %s", updated_anomaly_levels[level_name].artefacts[id], id, level_name)
 		updated_anomaly_levels[level_name].artefacts[id] = nil
 	end
 end
@@ -2341,7 +2372,7 @@ function save_level(m_data)
 end
 
 function on_before_level_changing()
-	printf("DRX DA saving previous_level")
+	printf("saving previous_level")
 	alife_storage_manager.get_state().drx_da_previous_level = level.name()
 	UnregisterScriptCallback("save_state", save_level)
 end
@@ -2420,7 +2451,10 @@ function open_anomaly_article(section)
 	local pda_ui = ui_pda_encyclopedia_tab.get_ui()
 	pda_ui:InitCategories() 
 	pda_ui:SelectCategory("encyclopedia_anomalies")
-	pda_ui:SelectArticle(additional_articles_to_category.encyclopedia_anomalies[section])	
+	pda_ui:SelectArticle(additional_articles_to_category.encyclopedia_anomalies[section])
+	if pda_ui.article_list and pda_ui.article_list.GetSelectedIndex then
+		pda_ui.article_list:SetSelectedIndex(pda_ui.article_list:GetSelectedIndex() + 1)
+	end
 end
 
 -- Patch article list
@@ -2445,9 +2479,9 @@ function reset_timers()
 	last_surge_time = 0
 	for k, v in pairs(updated_anomaly_levels) do
 		v.time = -1
-		printf("DRX DA, time resetted for %s", k)
+		printf("time resetted for %s", k)
 	end
-	printf("DRX DA, last_surge_time is 0")
+	printf("last_surge_time is 0")
 end
 
 function print_anomalies()
@@ -2465,7 +2499,7 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 	local function generate_anomalies()
 		local level_data = get_level_data(level_name)
 		if not level_data then
-			printf("DRX DA Error, unable to get data for %s", level_name)
+			printf("Error, unable to get data for %s", level_name)
 			return
 		end
 
@@ -2496,7 +2530,7 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 				    local anomaly_list = collect_section(level_file, "anomaly_types")
 				    if anomaly_list and #anomaly_list >= 1 then
 				    	local anomaly_type = anomaly_list[random(#anomaly_list)]
-				    	printf("DRX DA picked anomaly type %s", anomaly_type)
+				    	printf("picked anomaly type %s", anomaly_type)
 
 				    	if not anomalies_by_smart[smart_name] then anomalies_by_smart[smart_name] = {} end
 			        	local j = size_table(anomalies_by_smart[smart_name])
@@ -2512,10 +2546,10 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 			        		j = j + 1
 			        	end
 				    else
-				    	printf("DRX DA: No dynamic anomaly types specified for level %s", level_name)
+				    	printf("No dynamic anomaly types specified for level %s", level_name)
 				    end
 				else
-					printf("DRX DA: no anomalies spawn on smart %s, level %s in restriction", smart_name, level_name)
+					printf("no anomalies spawn on smart %s, level %s in restriction", smart_name, level_name)
 				end
 	        end
 	    end
@@ -2542,7 +2576,7 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 			end
 			return true
 		end, function()
-			printf("DRX DA, anomalies updated after surge on level %s", level_name)
+			printf("anomalies updated after surge on level %s", level_name)
 		end)
 	end
 end

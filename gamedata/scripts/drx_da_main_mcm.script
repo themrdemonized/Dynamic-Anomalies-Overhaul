@@ -1,3 +1,29 @@
+-- Table of new anomalies sections
+new_anomalies_sections = {
+    zone_mine_radar = true,
+    zone_mine_darkness = true,
+    zone_mine_flash = true,
+    zone_mine_ghost = true,
+    zone_mine_gold = true,
+    zone_mine_green_dragon = true,
+    zone_mine_mefistotel = true,
+    zone_mine_net = true,
+    zone_mine_point = true,
+    zone_mine_sphere = true,
+}
+
+-- Table of variations of old anomalies
+variations_anomalies_sections = {
+    zone_unknown = true,
+    zone_mine_acid = true,
+    zone_mine_electra = true,
+    zone_mine_springboard = true,
+    zone_mine_vortex = true,
+    zone_mine_blast = true,
+    zone_mine_zharka = true,
+    zone_mine_vapour = true,
+}
+
 op = {
 	id = "drx_da", sh = true, gr = {
     	{id = "banner", type = "slide", text = "ui_mcm_drx_da_title", size = {512, 50}, spacing = 20},
@@ -5,10 +31,50 @@ op = {
         {id = "anomaly_amount_modifier", type = "track", val = 2, min = 0, max = 5, step = 0.2, def = 1},
         {id = "max_artefacts_per_zone", type = "track", val = 2, min = 0, max = 3, step = 1, def = 2},
         {id = "artefacts_spawn_chance", type = "track", val = 2, min = 0, max = 20, step = 1, def = 10},
+        {id = "disable_new_anomalies", type = "check", val = 1, def = false},
+
+        {id = "drx_da_choose_divider_begin", type = "line"},
+        -- Here will be anomalies choose to disable (see on_mcm_load)
+        {id = "drx_da_choose_divider_end", type = "line"},
+
         {id = "debug_mode", type = "check", val = 1, def = false},
     }
 }
 
+function add_drx_da_choose_options()
+    for i = #op.gr, 1, -1 do
+        if op.gr[i].id == "drx_da_choose_divider_end" then
+            -- Build list of new anomalies from drx_da_main.script
+            for k, _ in spairs(new_anomalies_sections, function(t, a, b) return a > b end) do
+                table.insert(op.gr, i, {id = k .. "_enable", type = "check", val = 1, def = true})
+                table.insert(op.gr, i, {id = k .. "_banner", type = "slide", link = "banner_" .. k .. ".dds", text = k .. "_section_name", size = {512, 50}, spacing = 20})
+            end
+            break
+        end
+    end
+end
+
+function remove_drx_da_choose_options()
+    for i = 1, #op.gr do
+        if op.gr[i].id == "drx_da_choose_divider_begin" then
+            i = i + 1
+            while op.gr[i].id ~= "drx_da_choose_divider_end" do
+                table.remove(op.gr, i)
+            end
+            break
+        end
+    end
+end
+
+function is_enabled_anomaly(section)
+    if ui_mcm then
+        return ui_mcm.get("drx_da/" .. section .. "_enable")
+    end
+    return true
+end
+
 function on_mcm_load()
+    remove_drx_da_choose_options()
+    add_drx_da_choose_options()
     return op
 end

@@ -38,7 +38,7 @@
 	</string>
 	
 	<string id="zone_mine_sphere_section_name">
-		<text>Press</text>
+		<text>Rebounder</text>
 	</string>
 	
 	<string id="encyclopedia_anomalies_radar">
@@ -150,14 +150,14 @@
 	</string>
 
 	<string id="encyclopedia_anomalies_sphere">
-		<text>Press</text>
+		<text>Rebounder</text>
 	</string>
 	<string id="encyclopedia_anomalies_sphere_text">
 		<text>
-			• Name: %c[d_cyan]Press%c[ui_gray_1]
+			• Name: %c[d_cyan]Rebounder%c[ui_gray_1]
 			\n• Type: %c[d_orange]Gravitational anomaly%c[ui_gray_1]
 			\n \n%c[d_green]Information%c[ui_gray_1]
-			\nGravitational anomaly, which is a concentrated standing waves of space, forming some kind of disc, perpendicular to the ground. This disc can act as a kind of shield or cover that repels or reduces the speed of fast objects such as bullets or projectiles, which can be used by stalkers to their advantage. 
+			\nGravitational anomaly, which is a concentrated standing waves of space, forming some kind of disc, perpendicular to the ground. This disc can act as a peculiar shield or cover that repels or reduces the speed of fast objects such as bullets or projectiles, which can be used by stalkers to their advantage. 
 		</text>
 	</string>
 

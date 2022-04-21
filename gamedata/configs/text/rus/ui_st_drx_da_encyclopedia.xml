@@ -38,7 +38,7 @@
 	</string>
 	
 	<string id="zone_mine_sphere_section_name">
-		<text>«Давилка»</text>
+		<text>«Отбойник»</text>
 	</string>
 	
 	<string id="zone_mine_radar_section_name">
@@ -150,11 +150,11 @@
 	</string>
 
 	<string id="encyclopedia_anomalies_sphere">
-		<text>«Давилка»</text>
+		<text>«Отбойник»</text>
 	</string>
 	<string id="encyclopedia_anomalies_sphere_text">
 		<text>
-			• Название: %c[d_cyan]Давилка%c[ui_gray_1]
+			• Название: %c[d_cyan]Отбойник%c[ui_gray_1]
 			\n• Тип: %c[d_orange]Гравитационная аномалия%c[ui_gray_1]
 			\n \n%c[d_green]Информация%c[ui_gray_1]
 			\nГравитационная аномалия, представляющая собой сконцетрированные стоячие волны пространства, формирующие некое подобие диска, перпендикулярного земле. Данный диск может играть роль своеобразного щита или укрытия, которое отталкивает или уменьшает скорость быстрых объектов таких как пули или снаряды, что может использоваться сталкерами в свою пользу. 

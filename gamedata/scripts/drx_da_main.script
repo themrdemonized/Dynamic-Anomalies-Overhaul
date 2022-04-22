@@ -399,74 +399,6 @@ anomaly_radii = {
 	zone_mine_zharka = {min = 1, max = 2},
 }
 
-allowed_artefacts = (function() -- Allowed artefacts to spawn
-	local allow_artefacts = (function()
-		local t = {}
-		ini_sys:section_for_each(function(sec)
-			if SYS_GetParam(0, sec, "kind", "") == "i_arty" then -- Allow artefacts
-				t[sec] = true
-			elseif SYS_GetParam(0, sec, "kind", "") == "i_arty_junk" then -- Allow junk artefacts
-				t[sec] = true
-			end
-		end)
-		return t
-	end)()
-
-	local ignore_artefacts = (function()
-		local t = {}
-		t["af_lucifer"] = true -- PBA
-
-		-- Unique artefacts
-		t["af_ameba_mica"] = true
-		t["af_ameba_slime"] = true
-		t["af_ameba_slug"] = true
-		t["af_base_mlr"] = true
-		t["af_black"] = true
-		t["af_control"] = true
-		t["af_drops"] = true
-		t["af_dummy_pellicle"] = true
-		t["af_dummy_spring"] = true
-		t["af_geliy"] = true
-		t["af_gimlet"] = true
-		t["af_monolith"] = true
-		t["af_oasis_heart"] = true
-		t["af_quest_b14_twisted"] = true
-		t["af_rusty_kristall"] = true
-		t["af_rusty_sea"] = true
-		t["af_rusty_thorn"] = true
-		t["af_vaselisk"] = true
-		t["jup_b1_half_artifact"] = true
-		t["marker"] = true
-		t["monolith_shard"] = true
-		ini_sys:section_for_each(function(sec)
-			if SYS_GetParam(0, sec, "kind", "") == "i_arty_cont" then -- Exclude artefacts in containers
-				t[sec] = true
-			elseif SYS_GetParam(0, sec, "kind", "") == "i_attach" then -- Exclude attachments
-				t[sec] = true
-			elseif SYS_GetParam(0, sec, "kind", "") == "i_quest" then -- Exclude quest items
-				t[sec] = true
-			elseif SYS_GetParam(0, sec, "kind", "") == "i_mutant_belt" then -- Exclude mutant hides
-				t[sec] = true
-			elseif SYS_GetParam(1, sec, "quest_item", false) then -- Exclude quest items
-				t[sec] = true
-			end
-		end)
-		return t
-	end)()
-
-	local t = {}
-	for k, v in pairs(allow_artefacts) do
-		if not ignore_artefacts[k] then
-			t[#t + 1] = k
-		end
-	end
-	return t
-end)()
-
-anomaly_type_to_artefacts = { -- Table of spawn artefacts by anomaly zone section
-
-}
-
 updated_anomaly_levels = {}
 last_surge_time = 0
 
@@ -1258,6 +1190,11 @@ end
 --	Last modified January 31, 2018
 -- ------------------------------------------------------------------------------------------------
 
+-- Table of small levels to adjust spawn extra to underground levels
+small_levels = {
+	l11_hospital = true,
+}
+
 -- Generate positional data:
 function drx_da_generate_position(smart_name)
 
@@ -1275,7 +1212,7 @@ function drx_da_generate_position(smart_name)
     local num_tries = (ini:r_float_ex("location_offset", "max_tries") or 64)
 
     -- Reduce offset by 2 times for underground
-    if level_weathers.bLevelUnderground then
+    if level_weathers.bLevelUnderground or small_levels[level.name()] then
     	max_offset_x = math.floor(max_offset_x * 0.5)
 		max_offset_y = math.floor(max_offset_y * 0.5)
 		max_offset_z = math.floor(max_offset_z * 0.5)
@@ -1361,7 +1298,7 @@ function spawn_artefact_on_smart(level_file, smart_name, picked_artefact, level_
     if pos then
 
     	-- Correct y position so the artefact wouldnt fall OOB
-    	pos = vector():set(pos.x, level_weathers.bLevelUnderground and pos.y + 1 or pos.y + 7, pos.z)
+    	pos = vector():set(pos.x, (level_weathers.bLevelUnderground or small_levels[level.name()]) and pos.y + 1 or pos.y + 7, pos.z)
 
         -- Get the new level vertex id for the generated position:
         local lvid = level.vertex_id(pos)
@@ -1405,21 +1342,53 @@ function spawn_artefacts_on_level(level_name)
     local size_table = size_table
     local random = math.random
 
+    local allowed_artefacts = drx_da_main_artefacts.allowed_artefacts
+    local anomaly_type_to_artefacts = drx_da_main_artefacts.anomaly_type_to_artefacts
+    local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name]
+
     -- Build anomalies table
     if is_not_empty(smart_list) then
+    	printf("%s has smarts with anomalies, try to spawn artefacts", level_name)
     	local artefacts = updated_anomaly_levels[level_name].artefacts or {}
     	local anomalies_by_smart =  updated_anomaly_levels[level_name].anomalies_by_smart
         for smart_name, _ in pairs(anomalies_by_smart) do
+        	printf("checking smart %s for spawning artefacts", smart_name)
         	if is_not_empty(anomalies_by_smart[smart_name]) and smart_list[smart_name] then
+        		printf("try to spawn artefacts on smart %s", smart_name)
 	        	for i = 1, settings.max_artefacts_per_zone do
 	        		-- Increased chance by 50% for underground levels
-	        		if random(100) <= math.ceil(settings.artefacts_spawn_chance * (level_weathers.bLevelUnderground and 1.5 or 1)) then
+	        		if random(100) <= math.ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level.name()]) and 1.5 or 1)) then
 			        	-- Choose an artefact to spawn:
 			        	local anomaly_type = updated_anomaly_levels[level_name].anomaly_types_by_smart[smart_name]
-			        	local picked_artefact = anomaly_type and
-			        							anomaly_type_to_artefacts[anomaly_type] and
-			        							anomaly_type_to_artefacts[anomaly_type][random(#anomaly_type_to_artefacts[anomaly_type])] 
-			        							or allowed_artefacts[random(#allowed_artefacts)]
+			        	local picked_artefact = (function()
+
+			        		local res
+			        		if artefacts_map_tiers and random(100) > settings.random_artefact_spawn_chance then
+			        			if anomaly_type_to_artefacts[anomaly_type] then
+			        				local t = {}
+			        				for k, v in pairs(artefacts_map_tiers) do
+			        					if anomaly_type_to_artefacts[anomaly_type][v] then
+			        						t[#t + 1] = v
+			        					end
+			        				end
+			        				printf("picking artefact by level %s, anomaly zone %s has defined arty list", level_name, anomaly_type)
+			        				res = t[random(#t)]
+			        			else
+			        				printf("picking artefact by level %s", level_name)
+			        				res = artefacts_map_tiers[random(#artefacts_map_tiers)]
+			        			end
+			        		else
+			        			printf("picking random artefacts")
+			        			res = allowed_artefacts[random(#allowed_artefacts)]
+			        		end
+
+			        		if not res then 
+			        			printf("failed to pick artefact by level, pick random from allowed, level_name %s, anomaly_type %s, has artefacts_map_tiers %s, has anomaly_type_to_artefacts %s", level_name, anomaly_type, artefacts_map_tiers ~= nil, anomaly_type_to_artefacts[anomaly_type] ~= nil)
+			        			res = allowed_artefacts[random(#allowed_artefacts)]
+			        		end
+
+			        		return res
+			        	end)()
 
 			        	-- Artefact Variationizer compatibility
 			        	if artefact_variationizer then
@@ -1444,6 +1413,8 @@ function spawn_artefacts_on_level(level_name)
 	        end
 	    end
         return size_table(artefacts) > 0
+    else
+		printf("%s has no smarts with anomalies, dont spawn artefacts", level_name)
     end
 end
 
@@ -2298,9 +2269,23 @@ anomalies_monster_hit_functions = {
 	-- Flash special hit behaviour - Time travel
 	zone_mine_flash = function(monster, s_hit, bone_id, flags, actor)
 		printf("flash got hit %s", monster:section())
+		s_hit.power = 0
 		flags.ret_value = false
 		alife():release(alife():object(monster:id()))
 	end,
+
+	-- Reduce power for Rebounder
+	-- zone_mine_sphere = function(monster, s_hit, bone_id, flags, actor)
+	-- 	local sec = monster:section()
+	-- 	printf("rebounder got hit %s", sec)
+	-- 	s_hit.power = 0
+	-- 	flags.ret_value = false
+
+	-- 	local immunities_sec = SYS_GetParam(0, sec, "protections_sect", sec)
+	-- 	local hit_power = SYS_GetParam(2, "zone_mine_sphere", "max_start_power", 1) * SYS_GetParam(2, immunities_sec, "hit_fraction_monster", 1)
+
+	-- 	monster:change_health(-hit_power)
+	-- end,
 
 }
 

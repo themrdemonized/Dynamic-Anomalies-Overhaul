@@ -2177,6 +2177,20 @@ item_device.device_binder.process_flicker = function(self, force)
 	process_flicker(self, pda_glitch_value or force)
 end
 
+process_torch = item_device.device_binder.process_torch
+item_device.device_binder.process_torch = function(self, id, section, condition)
+	process_torch(self, id, section, condition)
+
+	-- Beef's NVG integration
+	if z_beefs_nvgs then
+		if self.N_V then
+			z_beefs_nvgs.nvg_glitch(clamp(pda_glitch_value or 0, 0, 0.9))
+		else
+			z_beefs_nvgs.nvg_glitch(0)
+		end
+	end
+end
+
 local actor_on_update_time = 0
 local actor_on_update_timer = 100
 function actor_on_update()

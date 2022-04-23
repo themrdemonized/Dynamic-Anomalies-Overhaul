@@ -32,12 +32,14 @@ op = {
         {id = "max_artefacts_per_zone", type = "track", val = 2, min = 0, max = 3, step = 1, def = 2},
         {id = "artefacts_spawn_chance", type = "track", val = 2, min = 0, max = 25, step = 1, def = 15},
         {id = "random_artefact_spawn_chance", type = "track", val = 2, min = 0, max = 100, step = 1, def = 25},
+        {id = "enable_anomalies_behaviour", type = "check", val = 1, def = true},
         {id = "disable_new_anomalies", type = "check", val = 1, def = false},
 
         {id = "drx_da_choose_divider_begin", type = "line"},
         -- Here will be anomalies choose to disable (see on_mcm_load)
         {id = "drx_da_choose_divider_end", type = "line"},
 
+        {id = "delete_dynamic_anomalies", type = "check", val = 1, def = false},
         {id = "debug_mode", type = "check", val = 1, def = false},
     }
 }

@@ -682,8 +682,11 @@ end
 function enable_anomaly_obj(id, level_name)
 	local obj = get_anomaly_obj(id, level_name)
 	if obj then
-		printf("enabling anomaly %s, %s, level %s", obj:section(), obj:id(), level_name)
-		obj:enable_anomaly()
+		local g_obj = level.object_by_id(id)
+		if g_obj and g_obj ~= 0 and g_obj:id() ~= 0 then
+			printf("enabling anomaly %s, %s, level %s", g_obj:section(), g_obj:id(), level_name)
+			g_obj:enable_anomaly()
+		end
 	end
 end
 
@@ -1451,13 +1454,13 @@ function drx_da_update_dynamic_anomalies(force)
 	    	printf("updated anomalies on level %s", level_name)
 	    	updated_anomaly_levels[level_name].time = last_surge_time
 	    	build_anomalies_pos_tree()
-	    	register_anomalies_behaviour()
+	    	if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
 	    	spawn_artefacts_on_level(level_name)
 	    	return true
     	end)
     else
     	printf("anomalies not updated on level %s, no emission happened, last_surge_time %s, level update time %s", level_name, last_surge_time, updated_anomaly_levels[level_name].time)
-    	register_anomalies_behaviour()
+    	if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
     end
 
     return true
@@ -1480,7 +1483,7 @@ function drx_da_actor_on_update_callback()
     printf("saved level %s, current level %s", level.name(), alife_storage_manager.get_state().drx_da_previous_level)
 	if level.name() == alife_storage_manager.get_state().drx_da_previous_level then
 		printf("on the same level, only register behaviour")
-		register_anomalies_behaviour()
+		if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
 		unregister_drx_da()
 		build_anomalies_pos_tree()
 		RegisterScriptCallback("actor_on_update", actor_on_update)
@@ -1513,7 +1516,7 @@ anomalies_do_not_register_behaviour = {
 function register_anomalies_behaviour()
 	local level_name = level.name()
 	if is_empty(updated_anomaly_levels[level_name]) or is_empty(updated_anomaly_levels[level_name].anomalies) then
-	 	printf("anomalies, anomalies not found for level %s", level_name)
+	 	printf("anomalies behaviour, anomalies not found for level %s", level_name)
 	 	return
 	end
 
@@ -1525,7 +1528,7 @@ function register_anomalies_behaviour()
 		end
 	end
 
-	printf("anomalies, turning on behaviour for level %s", level_name)
+	printf("anomalies behaviour, turning on behaviour for level %s", level_name)
 
 	for k, v in pairs(updated_anomaly_levels[level_name].anomalies_properties) do
 		v.update_time = time_global()
@@ -2364,6 +2367,21 @@ end
 
 local function on_option_change()
 	load_settings()
+	if settings.delete_dynamic_anomalies then
+		clean_dynamic_anomalies_global()
+		build_anomalies_pos_tree()
+		if ui_mcm then
+			ui_mcm.set("drx_da/delete_dynamic_anomalies", false)
+		end
+		return
+	end
+
+	unregister_anomalies_behaviour()
+	if settings.enable_anomalies_behaviour then
+		register_anomalies_behaviour()
+	else
+		enable_anomalies_on_level()
+	end
 end
 
 -- Register callback scripts:

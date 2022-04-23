@@ -35,6 +35,9 @@ op = {
         {id = "enable_anomalies_behaviour", type = "check", val = 1, def = true},
         {id = "disable_new_anomalies", type = "check", val = 1, def = false},
 
+        {id = "divider", type = "line"},
+        {id = "drx_da_choose_help", type = "desc", clr = {200, 200, 255, 200}, text = "ui_mcm_drx_da_choose_help"},
+
         {id = "drx_da_choose_divider_begin", type = "line"},
         -- Here will be anomalies choose to disable (see on_mcm_load)
         {id = "drx_da_choose_divider_end", type = "line"},

@@ -2161,6 +2161,8 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	end
 end
 
+-- Apply glitches and flickers to active items near electrical anomalies
+-- See above how value is set
 pda_glitch_value = nil
 process_glitch = item_device.device_binder.process_glitch
 item_device.device_binder.process_glitch = function(self, id, section, condition)
@@ -2172,7 +2174,7 @@ end
 
 process_flicker = item_device.device_binder.process_flicker
 item_device.device_binder.process_flicker = function(self, force)
-	process_flicker(self, pda_glitch_value ~= nil or force)
+	process_flicker(self, pda_glitch_value or force)
 end
 
 local actor_on_update_time = 0

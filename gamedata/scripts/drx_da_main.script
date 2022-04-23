@@ -1911,9 +1911,13 @@ anomalies_near_actor_functions = {
 			end
 		end
 
-		local effector_modifier = effector_modifier or 0.66
+
 		local closest_mine = anomalies_sec_to_obj.zone_mine_electric:nearest(actor:position())
-		local effector_power = (1.05 - (closest_mine and math.min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr) ^ 2 * effector_modifier
+		local mine_factor = (closest_mine and math.min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
+
+		-- PPE effector
+		local effector_modifier = effector_modifier or 0.66
+		local effector_power = (1.05 - mine_factor) ^ 2 * effector_modifier
 		local pps = anomalies_vars.zone_mine_electric_pp_effectors
 		for i = 1, #pps do
 			local key = "zone_mine_electric" .. pps[i].code
@@ -1927,6 +1931,12 @@ anomalies_near_actor_functions = {
 				level.remove_pp_effector(pps[i].code)
 			end, key, 1)
 		end
+
+		-- PDA glitching, set value for binder, patch binder, see below
+		pda_glitch_value = clamp(1 - mine_factor, 0, 1)
+		add_simple_timed_effect(0.2, nil, function()
+			pda_glitch_value = nil
+		end, "zone_mine_electric_pda_glitch", 1)
 	end,
 
 	zone_mine_electric_weak = function(anomaly, actor, distance_to_sqr, radius_sqr)
@@ -1981,10 +1991,19 @@ anomalies_near_actor_functions = {
 			if item then
 				local cond = item:condition()
 				if cond > 0.01 then
-					item:set_condition(cond + 0.001 * (1 - distance_to_sqr / radius_sqr))
+					item:set_condition(cond + 0.0006 * (1 - distance_to_sqr / radius_sqr) ^ 2)
 				end
 			end
 		end
+
+		local closest_mine = anomalies_sec_to_obj.zone_mine_point:nearest(actor:position())
+		local mine_factor = (closest_mine and math.min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
+		
+		-- PDA glitching, set value for binder, patch binder, see below
+		pda_glitch_value = clamp(1 - mine_factor, 0, 1)
+		add_simple_timed_effect(0.2, nil, function()
+			pda_glitch_value = nil
+		end, "zone_mine_electric_pda_glitch", 1)
 	end,
 
 	-- Liquid Gold, drains stamina and thirst
@@ -2140,6 +2159,20 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 			-- printf("actor near anomaly %s, firing effect, delta %s", section, delta)
 		end
 	end
+end
+
+pda_glitch_value = nil
+process_glitch = item_device.device_binder.process_glitch
+item_device.device_binder.process_glitch = function(self, id, section, condition)
+	process_glitch(self, id, section, condition)
+	if pda_glitch_value then
+		self.object:set_psy_factor(pda_glitch_value)
+	end
+end
+
+process_flicker = item_device.device_binder.process_flicker
+item_device.device_binder.process_flicker = function(self, force)
+	process_flicker(self, pda_glitch_value ~= nil or force)
 end
 
 local actor_on_update_time = 0

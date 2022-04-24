@@ -2,16 +2,16 @@ MODDED EXES ARE REQUIRED FOR WORK: https://github.com/themrdemonized/STALKER-Ano
 
 DLTX OR FDDA EXES ALSO WORK
 
-Dynamic Anomalies Overhaul 0.6.3
+Dynamic Anomalies Overhaul (DAO)
 Written by demonized, 2022
 Based on work by DoctorX and Eugenium Hazardous Anomalies
 Features
 	Creating anomalies at the start of level after emission/psi-storm and removing anomalies after emission/psi-storm instead of just disabling them, allowing for truly dynamic generation
 	Anomalies behaviour:
 		enable/disable with randomized periods, duration and cooldowns for every single anomaly
-		behaviour if actor is near an anomaly (wip)
-		behaviour on hit (wip)
-		articles about new anomalies (wip)
+		behaviour if actor is near an anomaly
+		behaviour on hit
+		articles about new anomalies
    	Spawning artefacts in new anomaly zones
  	Enhanced behaviour of usual anomalies
 
@@ -25,8 +25,8 @@ New anomalies:
 	- "Net" - Fountain of particles
 	- "Point" - Ball lightning anomaly, special behaviour - charges batteries of active items if near actor
 	- "Radar" - Psy anomaly, has weak but unavoidable psy field which hurts player along with main hit
-	- "Press" - Gravitational anomaly, provides 50% resistance to bullet damage if near actor
+	- "Rebounder" - Gravitational anomaly, provides 50%-100% resistance to bullet damage if near actor
 
 Enhanced old anomalies:
-	- Electra - has electric field that damages player and equipment
+	- Electra - has electric field that damages player and equipment, causes electrical interference to PDA and flashlights
 	- Gravitational anomalies - emits disturbance in gravitational field, causing player to tremble and shake

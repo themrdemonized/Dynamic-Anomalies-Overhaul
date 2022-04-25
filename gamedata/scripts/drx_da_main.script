@@ -1195,6 +1195,7 @@ end
 
 -- Table of small levels to adjust spawn extra to underground levels
 small_levels = {
+	y04_pole = true,
 	l11_hospital = true,
 }
 
@@ -1359,8 +1360,8 @@ function spawn_artefacts_on_level(level_name)
         	if is_not_empty(anomalies_by_smart[smart_name]) and smart_list[smart_name] then
         		printf("try to spawn artefacts on smart %s", smart_name)
 	        	for i = 1, settings.max_artefacts_per_zone do
-	        		-- Increased chance by 50% for underground levels
-	        		if random(100) <= math.ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level.name()]) and 1.5 or 1)) then
+	        		-- Increased chance by 100% for underground levels
+	        		if random(100) <= math.ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level.name()]) and 2 or 1)) then
 			        	-- Choose an artefact to spawn:
 			        	local anomaly_type = updated_anomaly_levels[level_name].anomaly_types_by_smart[smart_name]
 			        	local picked_artefact = (function()

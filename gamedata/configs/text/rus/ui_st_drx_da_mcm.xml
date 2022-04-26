@@ -16,6 +16,20 @@
 		<text>Ўанс по€влени€ аномальной зоны на предопределенной местности</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_max">
+		<text>–адиус аномальной зоны</text>
+	</string>
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_max_desc">
+		<text>ћаксимальное рассто€ние от центра смарт террейна, допустимое дл€ зоны аномалий</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_min">
+		<text>ћинимальное рассто€ние между аномали€ми</text>
+	</string>
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_min_desc">
+		<text>ќпредел€ет минимальное рассто€ние между аномали€ми в зоне. ќтрицательные значени€ позвол€ют аномали€м перекрывать друг друга.</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_anomaly_amount_modifier">
 		<text>ћодификатор количества аномалий</text>
 	</string>

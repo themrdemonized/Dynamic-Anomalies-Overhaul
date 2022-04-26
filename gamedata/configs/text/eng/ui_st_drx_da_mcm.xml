@@ -16,6 +16,20 @@
 		<text>The chance for predefined smart terrain to spawn anomaly zone</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_max">
+		<text>Anomaly Zone Radius</text>
+	</string>
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_max_desc">
+		<text>Maximum distance from the center of smart terrain that is allowed for anomaly zone</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_min">
+		<text>Minimum Distance Between Anomalies</text>
+	</string>
+	<string id="ui_mcm_drx_da_anomaly_zone_anomalies_distance_min_desc">
+		<text>Defines minimum distance between anomalies in zone. Negative values will allow anomalies to overlap each other</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_anomaly_amount_modifier">
 		<text>Anomaly Amount Modifier</text>
 	</string>

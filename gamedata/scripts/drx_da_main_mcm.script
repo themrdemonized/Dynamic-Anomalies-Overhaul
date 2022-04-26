@@ -28,6 +28,8 @@ op = {
 	id = "drx_da", sh = true, gr = {
     	{id = "banner", type = "slide", text = "ui_mcm_drx_da_title", size = {512, 50}, spacing = 20},
         {id = "anomaly_zone_spawn_chance", type = "track", val = 2, min = 0, max = 1, step = 0.1, def = 1},
+        {id = "anomaly_zone_anomalies_distance_max", type = "track", val = 2, min = 1, max = 60, step = 1, def = 40},
+        {id = "anomaly_zone_anomalies_distance_min", type = "track", val = 2, min = -5, max = 5, step = 0.1, def = 1},
         {id = "anomaly_amount_modifier", type = "track", val = 2, min = 0, max = 5, step = 0.2, def = 1},
         {id = "max_artefacts_per_zone", type = "track", val = 2, min = 0, max = 3, step = 1, def = 2},
         {id = "artefacts_spawn_chance", type = "track", val = 2, min = 0, max = 25, step = 1, def = 15},

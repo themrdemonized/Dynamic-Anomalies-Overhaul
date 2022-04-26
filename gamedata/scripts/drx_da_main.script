@@ -891,7 +891,7 @@ function clean_dynamic_anomalies_global()
 	printf("Cleaned dynamic anomalies globally")
 end
 
-function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name)
+function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name, position_data)
 	-- Get the smart terrain:
     local smart = SIMBOARD.smarts_by_names[smart_name]
     if not smart then
@@ -900,7 +900,7 @@ function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, lev
     end
 
     -- Select a location for the current anomaly:
-    local pos = drx_da_generate_position(smart_name)
+    local pos = drx_da_generate_position(smart_name, anomaly_type, position_data)
     if pos then
 
         -- Get the new level vertex id for the generated position:
@@ -1055,9 +1055,25 @@ function drx_da_spawn_anomalies_on_level(level_name)
 
 			    	if not anomalies_by_smart[smart_name] then anomalies_by_smart[smart_name] = {} end
 		        	local j = size_table(anomalies_by_smart[smart_name])
+
+		        	-- Store position data of generated anomalies
+		        	local position_data = kd_tree.buildTreeVectors()
+
+		        	if j > 0 then
+		        		for k, v in pairs(anomalies_by_smart[smart_name]) do
+		        			local se_obj = get_anomaly_obj(k)
+		        			if se_obj then
+		        				local pos = se_obj.position
+		        				if pos then
+		        					position_data:insertAndRebuild({x = pos.x, y = pos.y, z = pos.z})
+		        				end
+		        			end
+		        		end
+		        	end
+
 		        	while j < (smart_list_reduced[smart_name] and random(3) or anomaly_max_number) do 
 		        		if random() <= (smart_list_reduced[smart_name] and 0.5 or spawn_percent) then
-		        			local anom_id = drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name)
+		        			local anom_id = drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name, position_data)
 		        			if anom_id then
 			        			anomalies[#anomalies + 1] = anom_id
 			        			anomalies_by_smart[smart_name][anom_id] = true
@@ -1200,7 +1216,7 @@ small_levels = {
 }
 
 -- Generate positional data:
-function drx_da_generate_position(smart_name)
+function drx_da_generate_position(smart_name, anomaly_type, position_data)
 
     -- Get the smart terrain:
     local smart = SIMBOARD.smarts_by_names[smart_name]
@@ -1210,9 +1226,9 @@ function drx_da_generate_position(smart_name)
     end
 
     -- Get maximum offset values:
-    local max_offset_x = (ini:r_float_ex("location_offset", "max_offset_x") or 40)
-    local max_offset_y = (ini:r_float_ex("location_offset", "max_offset_y") or 0)
-    local max_offset_z = (ini:r_float_ex("location_offset", "max_offset_z") or 40)
+    local max_offset_x = settings.anomaly_zone_anomalies_distance_max or ini:r_float_ex("location_offset", "max_offset_x") or 40
+    local max_offset_y = ini:r_float_ex("location_offset", "max_offset_y") or 0
+    local max_offset_z = settings.anomaly_zone_anomalies_distance_max or ini:r_float_ex("location_offset", "max_offset_z") or 40
     local num_tries = (ini:r_float_ex("location_offset", "max_tries") or 64)
 
     -- Reduce offset by 2 times for underground
@@ -1228,7 +1244,7 @@ function drx_da_generate_position(smart_name)
     while ((valid_lvid ~= true) and (num_tries > 0)) do
 
         -- Randomly offset anomaly x-position from center of smart terrain:
-        local offset_x = (max_offset_x * math.random()) + 0.5
+        local offset_x = max_offset_x * math.random()
         if (math.random() <= 0.5) then
             offset_x = -(offset_x)
         end
@@ -1242,7 +1258,7 @@ function drx_da_generate_position(smart_name)
         local pos_y = (smart.position.y + offset_y)
 
         -- Randomly offset anomaly z-position from center of smart terrain:
-        local offset_z = (max_offset_z * math.random()) + 0.5
+        local offset_z = max_offset_z * math.random()
         if (math.random() <= 0.5) then
             offset_z = -(offset_z)
         end
@@ -1253,7 +1269,33 @@ function drx_da_generate_position(smart_name)
         local lvid = level.vertex_id(pos)
         if (lvid < 4294967295) then
             pos = level.vertex_position(lvid)
-            valid_lvid = true
+            -- If position data exists and distance of generated position is more than anomaly radius - valid
+            try(function()
+	            if anomaly_type and anomaly_radii[anomaly_type] and position_data and position_data.root then
+	            	local nearest = position_data:nearest(pos)
+	            	if nearest and nearest[1] and nearest[1][2] then
+	            		local distance = math.sqrt(nearest[1][2]) - anomaly_radii[anomaly_type].max
+	            		if distance >= settings.anomaly_zone_anomalies_distance_min then
+	            			printf("Anomaly type %s, Position data valid, distance %s, saving %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
+	            			position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+	            			valid_lvid = true
+	            		else
+	            			printf("Anomaly type %s, Position data invalid, too close, distance %s, %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
+	            			valid_lvid = false
+	            		end
+	            	else
+	            		printf("Anomaly type %s, Can't check position data %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
+	            		position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+	            		valid_lvid = true
+	            	end
+	            else
+	            	if position_data then
+	            		printf("Anomaly type %s, Position data provided, saving %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
+	            		position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+	            	end
+	            	valid_lvid = true
+	            end
+	        end)
         end
 
         -- Decrement the number of tries left:
@@ -1853,7 +1895,7 @@ anomalies_near_actor_functions = {
 				local prot = c_obj and c_obj:GetDefHitTypeProtection(hit_type_shock) or 0
 
 				-- Optional modifier for less viability
-				prot = prot * 0.5
+				prot = prot * 0.75
 				hit_additional = hit_additional + prot
 			end
 
@@ -1864,7 +1906,7 @@ anomalies_near_actor_functions = {
 				local prot = c_obj and c_obj:GetDefHitTypeProtection(hit_type_shock) or 0
 
 				-- Optional modifier for less viability
-				prot = prot * 0.5
+				prot = prot * 0.75
 				hit_additional = hit_additional + prot
 			end
 
@@ -1882,7 +1924,7 @@ anomalies_near_actor_functions = {
 
 			-- Final modifier
 			local hit_modifier = hit_additional >= 0 and 1 + hit_additional or 1 / (1 - hit_additional)
-			local actor_hit_power = hit_power / hit_modifier * 0.002
+			local actor_hit_power = hit_power / hit_modifier * 0.0015
 			-- printf("hit %s", actor_hit_power)
 			actor:change_health(-actor_hit_power)
 

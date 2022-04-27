@@ -1402,8 +1402,13 @@ function spawn_artefacts_on_level(level_name)
         	if is_not_empty(anomalies_by_smart[smart_name]) and smart_list[smart_name] then
         		printf("try to spawn artefacts on smart %s", smart_name)
 	        	for i = 1, settings.max_artefacts_per_zone do
-	        		-- Increased chance by 100% for underground levels
-	        		if random(100) <= math.ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level.name()]) and 2 or 1)) then
+
+	        		-- Increased chance by 2 times for underground levels
+	        		local dice_roll = random(100)
+	        		local chance = math.ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level_name]) and 2 or 1))
+	        		printf("artefacts dice roll %s, chance %s, spawn %s", dice_roll, chance, dice_roll <= chance)
+
+	        		if dice_roll <= chance then
 			        	-- Choose an artefact to spawn:
 			        	local anomaly_type = updated_anomaly_levels[level_name].anomaly_types_by_smart[smart_name]
 			        	local picked_artefact = (function()
@@ -1767,7 +1772,7 @@ anomalies_near_actor_functions = {
 	-- Radar, negative psy aura
 	zone_mine_radar = function(anomaly, actor, distance_to_sqr, radius_sqr)
 		local h = hit()
-		h.power = level_environment.is_actor_immune() and 0 or (1 - distance_to_sqr / radius_sqr) * 0.015
+		h.power = level_environment.is_actor_immune() and 0 or (1 - distance_to_sqr / radius_sqr) * 0.004
 		if h.power > 0 then
 			h.type = hit.telepatic	
 			h.impulse = 0
@@ -1791,7 +1796,7 @@ anomalies_near_actor_functions = {
 
 			-- Final modifier
 			local hit_modifier = hit_additional >= 0 and 1 + hit_additional or 1 / (1 - hit_additional)
-			local actor_hit_power = h.power / hit_modifier * 0.1
+			local actor_hit_power = h.power / hit_modifier * 0.375
 			change_psy_health(-actor_hit_power)
 		end
 	end,
@@ -2085,6 +2090,9 @@ anomalies_spawn_functions = {
 			local sin_lut = anomalies_vars.sin_lut
 			local cos_lut = anomalies_vars.cos_lut
 
+			local level_vertex_id = level.vertex_id
+			local level_vertex_position = level.vertex_position
+
 			local i = random_choice(0, 45, 90, 135, 180)
 			local i_step = random_choice(1, 2, 3)
 			local j = 0
@@ -2128,8 +2136,15 @@ anomalies_spawn_functions = {
 
 				local offset_x = spawn_position.x + sin_lut[i] * x_modifier
 				local offset_z = spawn_position.z + sin_lut[j] * z_modifier
+				local offset_y = spawn_position.y
 
-				obj_set_anomaly_position(obj, vector_set(vector, offset_x, spawn_position.y, offset_z))
+				local lvid = level_vertex_id(vector_set(vector, offset_x, offset_y, offset_z))
+		        if (lvid < 4294967295) then
+		            local pos = level_vertex_position(lvid)
+		            offset_y = pos.y
+		        end
+
+				obj_set_anomaly_position(obj, vector_set(vector, offset_x, offset_y, offset_z))
 				i = i + i_step
 				j = j + j_step
 			end, nil, key)

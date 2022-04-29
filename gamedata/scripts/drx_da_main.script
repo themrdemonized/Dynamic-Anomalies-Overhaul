@@ -1794,7 +1794,7 @@ anomalies_near_actor_functions = {
 				local prot = SYS_GetParam(2, immunities_sec, "telepatic_immunity", 0) * cond
 
 				-- Optional modifier for viability
-				prot = prot * 3
+				prot = prot * 10
 				hit_additional = hit_additional + prot
 			end)
 
@@ -1927,7 +1927,7 @@ anomalies_near_actor_functions = {
 				local prot = SYS_GetParam(2, immunities_sec, "shock_immunity", 0) * cond
 
 				-- Optional modifier for viability
-				prot = prot * 2.5
+				prot = prot * 5
 				hit_additional = hit_additional + prot
 			end)
 
@@ -1947,7 +1947,7 @@ anomalies_near_actor_functions = {
 					local shock_immunity = SYS_GetParam(2, immunities_sec, "shock_immunity", 0) * cond
 
 					local hit_modifier = shock_immunity >= 0 and 1 + shock_immunity or 1 / (1 - shock_immunity)
-					obj:set_condition(cond - hit_power / hit_modifier * 0.0002)
+					obj:set_condition(cond - hit_power / hit_modifier * 0.00015)
 				end
 			end
 
@@ -1960,7 +1960,7 @@ anomalies_near_actor_functions = {
 					local shock_immunity = SYS_GetParam(2, immunities_sec, "shock_immunity", 0) * cond
 
 					local hit_modifier = shock_immunity >= 0 and 1 + shock_immunity or 1 / (1 - shock_immunity)
-					obj:set_condition(cond - hit_power / hit_modifier * 0.0002)
+					obj:set_condition(cond - hit_power / hit_modifier * 0.00015)
 				end
 			end
 		end

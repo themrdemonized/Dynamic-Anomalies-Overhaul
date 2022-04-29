@@ -1904,7 +1904,7 @@ anomalies_near_actor_functions = {
 				local prot = c_obj and c_obj:GetDefHitTypeProtection(hit_type_shock) or 0
 
 				-- Optional modifier for less viability
-				prot = prot * 0.75
+				prot = prot * 1
 				hit_additional = hit_additional + prot
 			end
 
@@ -1915,7 +1915,7 @@ anomalies_near_actor_functions = {
 				local prot = c_obj and c_obj:GetDefHitTypeProtection(hit_type_shock) or 0
 
 				-- Optional modifier for less viability
-				prot = prot * 0.75
+				prot = prot * 1
 				hit_additional = hit_additional + prot
 			end
 
@@ -2311,6 +2311,10 @@ function actor_on_item_take(obj)
 	end
 end
 
+function npc_on_item_take(npc, obj)
+	actor_on_item_take(obj)
+end
+
 -- Anomalies special hit behaviour
 anomalies_hit_functions = {
 
@@ -2512,7 +2516,7 @@ function on_game_start()
 	RegisterScriptCallback("actor_on_before_hit", actor_on_before_hit)
 	RegisterScriptCallback("monster_on_before_hit", monster_on_before_hit)
 	RegisterScriptCallback("actor_on_item_take", actor_on_item_take)
-	RegisterScriptCallback("npc_on_item_take", actor_on_item_take)
+	RegisterScriptCallback("npc_on_item_take", npc_on_item_take)
 	RegisterScriptCallback("actor_on_interaction", actor_on_interaction)
 	RegisterScriptCallback("on_before_level_changing", on_before_level_changing)
     RegisterScriptCallback("save_state", save_anomalies)

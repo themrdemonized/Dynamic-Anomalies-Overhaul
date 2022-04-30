@@ -1965,7 +1965,7 @@ anomalies_near_actor_functions = {
 			end
 		end
 
-
+		if not anomalies_sec_to_obj.zone_mine_electric then build_anomalies_pos_tree() end
 		local closest_mine = anomalies_sec_to_obj.zone_mine_electric:nearest(actor:position())
 		local mine_factor = (closest_mine and min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
 
@@ -2050,6 +2050,7 @@ anomalies_near_actor_functions = {
 			end
 		end
 
+		if not anomalies_sec_to_obj.zone_mine_point then build_anomalies_pos_tree() end
 		local closest_mine = anomalies_sec_to_obj.zone_mine_point:nearest(actor:position())
 		local mine_factor = (closest_mine and min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
 		

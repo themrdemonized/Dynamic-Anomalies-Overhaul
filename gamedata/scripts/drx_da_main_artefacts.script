@@ -72,6 +72,20 @@ allowed_artefacts = (function() -- Allowed artefacts to spawn
 	return t
 end)()
 
+-- Table of artefacts chances per level
+-- If defined, the chances from table will be used instead of default ones or from MCM
+
+artefacts_map_chances = {
+	["l03u_agr_underground"] = 50,
+	["l04u_labx18"] = 60,
+	["l08u_brainlab"] = 60,
+	["l10u_bunker"] = 80,
+	["l12u_control_monolith"] = 80,
+	["l12u_sarcofag"] = 80,
+	["l13u_warlab"] = 80,
+	["labx8"] = 80,
+}
+
 -- Table of artefacts per level
 artefacts_map_tiers = {
 	["k00_marsh"] = {
@@ -784,21 +798,6 @@ artefacts_map_tiers = {
 
 
 	["l03u_agr_underground"] = {
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_elektron",
-		"af_fire_loop",
-		"af_fonar",
-		"af_fountain",
-		"af_generator",
-		"af_kogot",
-		"af_peas",
-		"af_serofim",
-		"af_skull_miser",
-		"af_spaika",
-		"af_star_phantom",
-		"af_zhelch",
 		"af_death_lamp",
 
 		"af_pin",
@@ -902,26 +901,7 @@ artefacts_map_tiers = {
 
 
 	["l08u_brainlab"] = {
-		"af_atom",
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_cocoon",
-		"af_fire_loop",
-		"af_fonar",
-		"af_fountain",
-		"af_kogot",
-		"af_medallion",
-		"af_repei",
-		"af_sandstone",
-		"af_sandstone",
-		"af_serofim",
-		"af_skull_miser",
-		"af_spaika",
-		"af_star_phantom",
-		"af_zhelch",
 		"af_death_lamp",
-
 
 		"af_cristall",
 		"af_fireball",
@@ -1020,18 +1000,6 @@ artefacts_map_tiers = {
 
 
 	["labx8"] = {
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_chelust",
-		"af_cocoon",
-		"af_dragon_eye",
-		"af_fire_loop",
-		"af_kogot",
-		"af_repei",
-		"af_serofim",
-		"af_star_phantom",
-		"af_zhelch",
 		"af_death_lamp",
 
 		"af_cristall",
@@ -1302,25 +1270,6 @@ artefacts_map_tiers = {
 
 
 	["jupiter_underground"] = {
-		"af_atom",
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_cocoon",
-		"af_fire_loop",
-		"af_fonar",
-		"af_fountain",
-		"af_kogot",
-		"af_medallion",
-		"af_repei",
-		"af_sandstone",
-		"af_sandstone",
-		"af_serofim",
-		"af_skull_miser",
-		"af_spaika",
-		"af_star_phantom",
-		"af_zhelch",
-
 
 		"af_cristall",
 		"af_fireball",
@@ -1361,20 +1310,6 @@ artefacts_map_tiers = {
 
 
 	["l10u_bunker"] = {
-		"af_misery_bread",
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_chelust",
-		"af_cocoon",
-		"af_dragon_eye",
-		"af_fire_loop",
-		"af_kogot",
-		"af_repei",
-		"af_serofim",
-		"af_star_phantom",
-		"af_zhelch",
-
 
 		"af_cristall",
 		"af_fireball",
@@ -1473,29 +1408,7 @@ artefacts_map_tiers = {
 
 
 	["l04u_labx18"] = {
-		"af_misery_bread",
-		"af_ball",
-		"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_cocoon",
-		"af_ear",
-		"af_elektron",
-		"af_fire_loop",
-		"af_fonar",
-		"af_fountain",
-		"af_generator",
-		"af_kogot",
-		"af_medallion",
-		"af_repei",
-		"af_serofim",
-		"af_skull_miser",
-		"af_spaika",
-		"af_star_phantom",
-		"af_tapeworm",
-		"af_zhelch",
 		"af_death_lamp",
-
 
 		"af_cristall",
 		"af_cristall",
@@ -1604,19 +1517,6 @@ artefacts_map_tiers = {
 
 
 	["l12u_sarcofag"] = {
-		"af_misery_bread",
-				"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_chelust",
-		"af_cocoon",
-		"af_dragon_eye",
-		"af_fire_loop",
-		"af_kogot",
-		"af_repei",
-		"af_serofim",
-		"af_star_phantom",
-		"af_zhelch",
 
 		"af_cristall",
 		"af_fireball",
@@ -1660,19 +1560,6 @@ artefacts_map_tiers = {
 
 
 	["l12u_control_monolith"] = {
-		"af_misery_bread",
-			"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_chelust",
-		"af_cocoon",
-		"af_dragon_eye",
-		"af_fire_loop",
-		"af_kogot",
-		"af_repei",
-		"af_serofim",
-		"af_star_phantom",
-		"af_zhelch",
 
 		"af_cristall",
 		"af_fireball",
@@ -1771,19 +1658,6 @@ artefacts_map_tiers = {
 
 
 	["l13u_warlab"] = {
-		"af_misery_bread",
-				"af_bat",
-		"af_black_angel",
-		"af_cell",
-		"af_chelust",
-		"af_cocoon",
-		"af_dragon_eye",
-		"af_fire_loop",
-		"af_kogot",
-		"af_repei",
-		"af_serofim",
-		"af_star_phantom",
-		"af_zhelch",
 
 		"af_cristall",
 		"af_fireball",

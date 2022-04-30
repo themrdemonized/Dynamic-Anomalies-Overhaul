@@ -383,10 +383,14 @@ anomaly_radii = {
 	
 	zone_mine_acid = {min = 2, max = 3},
 	zone_mine_acidic_weak = {min = 2, max = 3},
+	zone_mine_acidic_average = {min = 2, max = 3},
+	zone_mine_acidic_strong = {min = 2, max = 3},
 	zone_mine_blast = {min = 2, max = 3},
 	zone_mine_darkness = {min = 2, max = 3},
 	zone_mine_electra = {min = 2, max = 3},
 	zone_mine_electric_weak = {min = 2, max = 3},
+	zone_mine_electric_average = {min = 2, max = 3},
+	zone_mine_electric_strong = {min = 2, max = 3},
 	zone_mine_flash = {min = 2, max = 3},
 	zone_mine_ghost = {min = 2, max = 2},
 	zone_mine_gold = {min = 2, max = 3},
@@ -401,6 +405,8 @@ anomaly_radii = {
 	zone_mine_sphere = {min = 2, max = 3},
 	zone_mine_springboard = {min = 4, max = 5},
 	zone_mine_thermal_weak = {min = 1, max = 2},
+	zone_mine_thermal_average = {min = 1, max = 2},
+	zone_mine_thermal_strong = {min = 1, max = 2},
 	zone_mine_vapour = {min = 1, max = 2},
 	zone_mine_vortex = {min = 3, max = 4},
 	zone_mine_zharka = {min = 1, max = 2},
@@ -1396,6 +1402,7 @@ function spawn_artefacts_on_level(level_name)
     local allowed_artefacts = drx_da_main_artefacts.allowed_artefacts
     local anomaly_type_to_artefacts = drx_da_main_artefacts.anomaly_type_to_artefacts
     local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name]
+    local artefacts_map_chances = drx_da_main_artefacts.artefacts_map_chances and drx_da_main_artefacts.artefacts_map_chances[level_name]
 
     -- Build anomalies table
     if is_not_empty(smart_list) then
@@ -1410,7 +1417,7 @@ function spawn_artefacts_on_level(level_name)
 
 	        		-- Increased chance by 2 times for underground levels
 	        		local dice_roll = random(100)
-	        		local chance = ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level_name]) and 2 or 1))
+	        		local chance = artefacts_map_chances or ceil(settings.artefacts_spawn_chance * ((level_weathers.bLevelUnderground or small_levels[level_name]) and 2 or 1))
 	        		printf("artefacts dice roll %s, chance %s, spawn %s", dice_roll, chance, dice_roll <= chance)
 
 	        		if dice_roll <= chance then

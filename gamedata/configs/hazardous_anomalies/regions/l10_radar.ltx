@@ -1,7 +1,7 @@
 ;Determines the spawn percentage per each anomaly and max number of them
 [spawn_properties]
 spawn_percent = 0.5
-anomaly_max_number = 30
+anomaly_max_number = 12
 anomaly_max_active = 38 ; Unused
 
 ;Determines the range of anomaly radius
@@ -40,10 +40,11 @@ zone_mine_gravitational_strong
 
 ;Determines the smarts around which anomalies will be created
 [available_smarts]
-rad_after_valley
+; rad_after_valley
+rad_rusty_forest_center
 ; rad_bloodsucker
-; rad_pseudodogs
-; rad_snork1
+rad_pseudodogs
+rad_snork1
 rad_snork2
 rad_valley
 ; rad_valley_dogs
@@ -51,11 +52,12 @@ rad_zombied1
 rad_zombied2
 rad2_loner_0000
 rad2_loner_0001
-rad2_loner_0002
+; rad2_loner_0002
 
 ;Determines the smarts around which anomalies will be created, with reduced amount (see script for how much)
 [available_smarts_reduced]
 rad_bloodsucker
-rad_pseudodogs
-rad_snork1
+; rad_pseudodogs
+; rad_snork1
 rad_valley_dogs
+rad_after_valley

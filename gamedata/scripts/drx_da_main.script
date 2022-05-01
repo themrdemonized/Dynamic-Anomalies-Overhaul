@@ -367,7 +367,11 @@ local ini = ini_file("drx\\drx_da_config.ltx")
 reduced_chance_levels = {
 	l03u_agr_underground = true,
 	l04u_labx18 = true,
+	l10_radar = true,
 	jupiter_underground = true,
+	jupiter = true,
+	l11_pripyat = true,
+	pripyat = true,
 	zaton = true,
 }
 
@@ -1927,6 +1931,7 @@ anomalies_near_actor_functions = {
 			end
 
 			-- Artefacts protection
+			local artefacts_protection = 0
 			actor:iterate_belt( function(owner, obj)
 				local sec = obj:section()
 				local cond = obj:condition()
@@ -1935,6 +1940,7 @@ anomalies_near_actor_functions = {
 
 				-- Optional modifier for viability
 				prot = prot * 5
+				artefacts_protection = artefacts_protection + prot
 				hit_additional = hit_additional + prot
 			end)
 
@@ -1952,6 +1958,7 @@ anomalies_near_actor_functions = {
 				if cond > 0.01 then
 					local immunities_sec = SYS_GetParam(0, sec, "immunities_sect", sec)
 					local shock_immunity = SYS_GetParam(2, immunities_sec, "shock_immunity", 0) * cond
+					shock_immunity = shock_immunity + artefacts_protection
 
 					local hit_modifier = shock_immunity >= 0 and 1 + shock_immunity or 1 / (1 - shock_immunity)
 					obj:set_condition(cond - hit_power / hit_modifier * 0.00015)
@@ -1965,6 +1972,7 @@ anomalies_near_actor_functions = {
 				if cond > 0.01 then
 					local immunities_sec = SYS_GetParam(0, sec, "immunities_sect", sec)
 					local shock_immunity = SYS_GetParam(2, immunities_sec, "shock_immunity", 0) * cond
+					shock_immunity = shock_immunity + artefacts_protection
 
 					local hit_modifier = shock_immunity >= 0 and 1 + shock_immunity or 1 / (1 - shock_immunity)
 					obj:set_condition(cond - hit_power / hit_modifier * 0.00015)

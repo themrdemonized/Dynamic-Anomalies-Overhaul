@@ -41,10 +41,10 @@
 		<text>«Отбойник»</text>
 	</string>
 	
-	<string id="zone_mine_radar_section_name">
+	<string id="encyclopedia_anomalies_radar">
 		<text>«Радар»</text>
 	</string>
-	<string id="zone_mine_radar_text_section_name">
+	<string id="encyclopedia_anomalies_radar_text">
 		<text>
 			• Название: %c[d_cyan]Радар%c[ui_gray_1]
 			\n• Тип: %c[d_orange]Пси-аномалия%c[ui_gray_1]

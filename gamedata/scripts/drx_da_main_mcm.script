@@ -24,16 +24,69 @@ variations_anomalies_sections = {
     zone_mine_vapour = true,
 }
 
+presets = {
+    [0] = {
+        anomaly_zone_spawn_chance           = 0.5,
+        anomaly_zone_anomalies_distance_max = 20,
+        anomaly_zone_anomalies_distance_min = 3,
+        anomaly_amount_modifier             = 0.5,
+        max_artefacts_per_zone              = 2,
+        artefacts_spawn_chance              = 15,
+        random_artefact_spawn_chance        = 25,
+        gravitational_shake_modifier        = 0.5,
+        electric_field_modifier             = 0.5,
+        enable_anomalies_behaviour          = true,
+    },
+    [1] = {
+        anomaly_zone_spawn_chance           = 1,
+        anomaly_zone_anomalies_distance_max = 40,
+        anomaly_zone_anomalies_distance_min = 1.5,
+        anomaly_amount_modifier             = 1,
+        max_artefacts_per_zone              = 2,
+        artefacts_spawn_chance              = 15,
+        random_artefact_spawn_chance        = 25,
+        gravitational_shake_modifier        = 1,
+        electric_field_modifier             = 1,
+        enable_anomalies_behaviour          = true,
+    },
+    [2] = {
+        anomaly_zone_spawn_chance           = 1,
+        anomaly_zone_anomalies_distance_max = 50,
+        anomaly_zone_anomalies_distance_min = 1,
+        anomaly_amount_modifier             = 1.5,
+        max_artefacts_per_zone              = 2,
+        artefacts_spawn_chance              = 25,
+        random_artefact_spawn_chance        = 25,
+        gravitational_shake_modifier        = 1,
+        electric_field_modifier             = 1.5,
+        enable_anomalies_behaviour          = true,
+    },
+}
+
+op_id = "drx_da"
+op_preset_id = "presets"
+
 op = {
-	id = "drx_da", sh = true, gr = {
+	id = op_id, sh = true, gr = {
     	{id = "banner", type = "slide", text = "ui_mcm_drx_da_title", size = {512, 50}, spacing = 20},
+
+        {id=op_preset_id, type="list", val=2, def=1, content={
+            {0, "drx_da_preset_easy"},
+            {1, "drx_da_preset_normal"},
+            {2, "drx_da_preset_hard"},
+        }},
+
         {id = "anomaly_zone_spawn_chance", type = "track", val = 2, min = 0, max = 1, step = 0.1, def = 1},
         {id = "anomaly_zone_anomalies_distance_max", type = "track", val = 2, min = 1, max = 60, step = 1, def = 40},
-        {id = "anomaly_zone_anomalies_distance_min", type = "track", val = 2, min = -5, max = 5, step = 0.1, def = 1},
-        {id = "anomaly_amount_modifier", type = "track", val = 2, min = 0, max = 5, step = 0.2, def = 1},
+        {id = "anomaly_zone_anomalies_distance_min", type = "track", val = 2, min = -5, max = 5, step = 0.1, def = 1.5},
+        {id = "anomaly_amount_modifier", type = "track", val = 2, min = 0, max = 3, step = 0.1, def = 1},
         {id = "max_artefacts_per_zone", type = "track", val = 2, min = 0, max = 3, step = 1, def = 2},
         {id = "artefacts_spawn_chance", type = "track", val = 2, min = 0, max = 25, step = 1, def = 15},
         {id = "random_artefact_spawn_chance", type = "track", val = 2, min = 0, max = 100, step = 1, def = 25},
+
+        {id = "divider", type = "line"},
+        {id = "gravitational_shake_modifier", type = "track", val = 2, min = 0, max = 2, step = 0.1, def = 1},
+        {id = "electric_field_modifier", type = "track", val = 2, min = 0, max = 3, step = 0.1, def = 1},
         {id = "enable_anomalies_behaviour", type = "check", val = 1, def = true},
         {id = "disable_new_anomalies", type = "check", val = 1, def = false},
 
@@ -79,6 +132,67 @@ function is_enabled_anomaly(section)
         return ui_mcm.get("drx_da/" .. section .. "_enable")
     end
     return true
+end
+
+function set_preset(self, p)
+    if not presets[p] then
+        printf("DRX DA preset %s not found", p)
+        return
+    end
+
+    -- Pre-build available MCM values
+    local t = {}
+    for _, v in ipairs(op.gr) do
+        if v.def ~= nil then
+            t[v.id] = v.def
+        end
+    end
+
+    for k, value in pairs(presets[p]) do
+        if t[k] then
+        
+            -- Validate option
+            local v = ui_mcm.get_opt_table(op_id .. "/" .. k)
+            if v and v.type then
+
+                -- Get proper value
+                if v.val == 0 then
+                    -- Pass input value as is
+                elseif v.val == 1 then
+                    value = (value == "true" or value == true) and true or false
+                elseif v.val == 2 then
+                    value = clamp(tonumber(value), v.min or 0, v.max or 100)
+                end
+                
+                -- Extract path and opt
+                local t = ui_mcm.str_opt_explode(op_id .. "/" .. k)
+                local opt = t[#t]
+                local path = t[1]
+                for i=2,#t-1 do
+                    path = ui_mcm.cc(path , t[i])
+                end
+                
+                -- Cache changes
+                self:CacheValue(path, opt, value, v)
+            end
+        end
+    end
+
+    -- Update XML elements
+    self:Reset_opt(self.last_curr_tree, self.last_path)
+    
+    -- Update state
+    self:UpdatePending()
+end
+
+MCM_Callback_List = ui_mcm.UIMCM.Callback_List
+ui_mcm.UIMCM.Callback_List = function(self, ctrl, path, opt, v)
+    MCM_Callback_List(self, ctrl, path, opt, v)
+    if path ~= op_id then return end
+    if opt == op_preset_id then
+        local value = self:GetValue(path, opt, v)
+        set_preset(self, value)
+    end
 end
 
 function on_mcm_load()

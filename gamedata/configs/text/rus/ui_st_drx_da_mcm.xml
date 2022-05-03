@@ -9,6 +9,22 @@
 		<text>DAO</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_presets">
+		<text>Предустановки</text>
+	</string>
+	<string id="ui_mcm_drx_da_presets_desc">
+		<text>Выберите предопределенные настройки из списка</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_easy">
+		<text>Легко</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_normal">
+		<text>Нормально</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_hard">
+		<text>Тяжело</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_anomaly_zone_spawn_chance">
 		<text>Шанс появления аномальной зоны</text>
 	</string>
@@ -56,6 +72,20 @@
 	</string>
 	<string id="ui_mcm_drx_da_random_artefact_spawn_chance_desc">
 		<text>Какие артефакты можно спаунить, определяется уровнем. Южные локации могут спаунить только слабые артефакты, в то время как подземные и северные локации могут спаунить сильные артефакты. Однако существует шанс, определяемый этим значением, что зона аномалий может спаунить любой артефакт, включая уникальные.</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_gravitational_shake_modifier">
+		<text>Модификатор гравитационного дрожания</text>
+	</string>
+	<string id="ui_mcm_drx_da_gravitational_shake_modifier_desc">
+		<text>Модификатор дрожания экрана вблизи гравитационных аномалий</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_electric_field_modifier">
+		<text>Модификатор электрического поля</text>
+	</string>
+	<string id="ui_mcm_drx_da_electric_field_modifier_desc">
+		<text>Модификатор повреждений от электрических полей. Не влияет на глюки электронных устройств</text>
 	</string>
 
 	<string id="ui_mcm_drx_da_enable_anomalies_behaviour">

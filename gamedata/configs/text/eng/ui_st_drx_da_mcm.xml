@@ -9,6 +9,22 @@
 		<text>DAO</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_presets">
+		<text>Presets</text>
+	</string>
+	<string id="ui_mcm_drx_da_presets_desc">
+		<text>Choose predefined settings from the list</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_easy">
+		<text>Easy</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_normal">
+		<text>Normal</text>
+	</string>
+	<string id="ui_mcm_lst_drx_da_preset_hard">
+		<text>Hard</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_anomaly_zone_spawn_chance">
 		<text>Anomaly Zone Spawn Chance</text>
 	</string>
@@ -56,6 +72,20 @@
 	</string>
 	<string id="ui_mcm_drx_da_random_artefact_spawn_chance_desc">
 		<text>Which artefacts can be spawn is defined by the level. South locations can spawn only weak artys, while underground and north ones can spawn strong artys. However there is a chance, defined by this value, that an anomaly zone can spawn any artefact, including unique ones</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_gravitational_shake_modifier">
+		<text>Gravitational Shake Modifier</text>
+	</string>
+	<string id="ui_mcm_drx_da_gravitational_shake_modifier_desc">
+		<text>Modifier of screen shake near gravitational anomalies</text>
+	</string>
+
+	<string id="ui_mcm_drx_da_electric_field_modifier">
+		<text>Electric Field Modifier</text>
+	</string>
+	<string id="ui_mcm_drx_da_electric_field_modifier_desc">
+		<text>Modifier of damage of electric fields. Does not affect glitches of electronic devices</text>
 	</string>
 
 	<string id="ui_mcm_drx_da_enable_anomalies_behaviour">

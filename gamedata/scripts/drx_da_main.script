@@ -366,6 +366,7 @@ local ini = ini_file("drx\\drx_da_config.ltx")
 -- Table of levels that will have reduced chance to spawn anomalies
 reduced_chance_levels = {
 	l03u_agr_underground = true,
+	l04_darkvalley = true,
 	l04u_labx18 = true,
 	l10_radar = true,
 	jupiter_underground = true,
@@ -1290,7 +1291,7 @@ function drx_da_generate_position(smart_name, anomaly_type, position_data)
 	            if anomaly_type and anomaly_radii[anomaly_type] and position_data and position_data.root then
 	            	local nearest = position_data:nearest(pos)
 	            	if nearest and nearest[1] and nearest[1][2] then
-	            		local distance = sqrt(nearest[1][2]) - anomaly_radii[anomaly_type].max
+	            		local distance = sqrt(nearest[1][2]) - anomaly_radii[anomaly_type].max * 2
 	            		if distance >= settings.anomaly_zone_anomalies_distance_min then
 	            			printf("Anomaly type %s, Position data valid, distance %s, saving %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
 	            			position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})

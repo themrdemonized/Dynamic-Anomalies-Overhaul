@@ -365,6 +365,7 @@ local ini = ini_file("drx\\drx_da_config.ltx")
 
 -- Table of levels that will have reduced chance to spawn anomalies
 reduced_chance_levels = {
+	k00_marsh = true,
 	l03u_agr_underground = true,
 	l04_darkvalley = true,
 	l04u_labx18 = true,

@@ -47,6 +47,24 @@ allowed_artefacts = (function() -- Allowed artefacts to spawn
 		t["jup_b1_half_artifact"] = true
 		t["marker"] = true
 		t["monolith_shard"] = true
+
+		-- Storylines Artefacts
+		t["af_ah_o1"] = true
+		t["af_ah_o2"] = true
+		t["af_ah_h1"] = true
+		t["af_ah_h2"] = true
+		t["af_ah_g1"] = true
+		t["af_ah_g2"] = true
+		t["af_ah_e1"] = true
+		t["af_ah_e2"] = true
+		t["af_ah_s1"] = true
+		t["af_ah_f1"] = true
+		t["af_ah_r1"] = true
+		t["af_ah_r2"] = true
+		t["af_ah_r3"] = true
+		t["af_ah_r4"] = true
+		t["af_ah_r5"] = true
+		
 		ini_sys:section_for_each(function(sec)
 			if SYS_GetParam(0, sec, "kind", "") == "i_arty_cont" then -- Exclude artefacts in containers
 				t[sec] = true

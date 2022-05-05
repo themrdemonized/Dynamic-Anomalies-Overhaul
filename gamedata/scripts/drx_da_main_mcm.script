@@ -185,13 +185,15 @@ function set_preset(self, p)
     self:UpdatePending()
 end
 
-MCM_Callback_List = ui_mcm.UIMCM.Callback_List
-ui_mcm.UIMCM.Callback_List = function(self, ctrl, path, opt, v)
-    MCM_Callback_List(self, ctrl, path, opt, v)
-    if path ~= op_id then return end
-    if opt == op_preset_id then
-        local value = self:GetValue(path, opt, v)
-        set_preset(self, value)
+if ui_mcm and ui_mcm.UIMCM and ui_mcm.UIMCM.Callback_List then
+    MCM_Callback_List = ui_mcm.UIMCM.Callback_List
+    ui_mcm.UIMCM.Callback_List = function(self, ctrl, path, opt, v)
+        MCM_Callback_List(self, ctrl, path, opt, v)
+        if path ~= op_id then return end
+        if opt == op_preset_id then
+            local value = self:GetValue(path, opt, v)
+            set_preset(self, value)
+        end
     end
 end
 

@@ -797,6 +797,7 @@ function clean_dynamic_anomalies_on_level_func(level_name)
 				updated_anomaly_levels[level_name].anomaly_types_by_smart[k] = nil
 				if is_empty(v) then
 					updated_anomaly_levels[level_name].anomalies_by_smart[k] = nil
+					updated_anomaly_levels[level_name].available_smarts_reduced[k] = nil
 				end
 			end
 
@@ -870,6 +871,7 @@ function clean_dynamic_anomalies_global()
 						v.anomaly_types_by_smart[k2] = nil
 						if is_empty(v2) then
 							v.anomalies_by_smart[k2] = nil
+							v.available_smarts_reduced[k2] = nil
 						end
 					end
 

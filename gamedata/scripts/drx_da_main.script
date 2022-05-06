@@ -2515,6 +2515,7 @@ end
 local function on_option_change()
 	load_settings()
 	if settings.delete_dynamic_anomalies then
+		unregister_anomalies_behaviour()
 		clean_dynamic_anomalies_global()
 		build_anomalies_pos_tree()
 		if ui_mcm then
@@ -2636,6 +2637,27 @@ end
 
 function print_anomalies()
 	return print_r(updated_anomaly_levels)
+end
+
+function debug_spawn_anomaly(sec)
+	local gvid = db.actor:game_vertex_id()
+	local r = level.get_target_dist and level.get_target_dist() or 3
+	local pos = vector():set(db.actor:position())
+	pos:add(device().cam_dir:mul(r))
+	pos = vector():set(pos.x,db.actor:position().y,pos.z)
+	local lvid = level.vertex_id(pos)
+
+	local level_name = level.name()
+	local level_data = get_level_data(level_name)
+	if not level_data then
+		printf("Error, unable to get data for %s", level_name)
+		return
+	end
+
+	local level_file = level_data.level_file
+
+	drx_da_spawn_anomaly(sec, pos, lvid, gvid, level_file)
+	build_anomalies_pos_tree()
 end
 
 -- Buggy consecutive update leading to softlocks and crashes

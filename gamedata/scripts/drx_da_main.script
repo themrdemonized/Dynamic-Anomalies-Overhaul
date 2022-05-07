@@ -1235,6 +1235,18 @@ small_levels = {
 	l11_hospital = true,
 }
 
+-- Table of anomalies to ignore distance check
+anomalies_distance_check_ignore = {
+	zone_field_radioactive = true,
+	zone_field_radioactive_average = true,
+	zone_field_radioactive_strong = true,
+	zone_field_radioactive_weak = true,
+	zone_radioactive = true,
+	zone_radioactive_average = true,
+	zone_radioactive_strong = true,
+	zone_radioactive_weak = true,
+}
+
 -- Generate positional data:
 function drx_da_generate_position(smart_name, anomaly_type, position_data)
 
@@ -1289,33 +1301,39 @@ function drx_da_generate_position(smart_name, anomaly_type, position_data)
 		local lvid = level_vertex_id(pos)
 		if (lvid < 4294967295) then
 			pos = level_vertex_position(lvid)
-			-- If position data exists and distance of generated position is more than anomaly radius - valid
-			try(function()
-				if anomaly_type and anomaly_radii[anomaly_type] and position_data and position_data.root then
-					local nearest = position_data:nearest(pos)
-					if nearest and nearest[1] and nearest[1][2] then
-						local distance = sqrt(nearest[1][2]) - anomaly_radii[anomaly_type].max * 2
-						if distance >= settings.anomaly_zone_anomalies_distance_min then
-							printf("Anomaly type %s, Position data valid, distance %s, saving %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
+			
+			-- Don't check distance for certain anomalies
+			if anomaly_type and anomalies_distance_check_ignore[anomaly_type] then
+				valid_lvid = true
+			else
+				-- If position data exists and distance of generated position is more than anomaly radius - valid
+				try(function()
+					if anomaly_type and anomaly_radii[anomaly_type] and position_data and position_data.root then
+						local nearest = position_data:nearest(pos)
+						if nearest and nearest[1] and nearest[1][2] then
+							local distance = sqrt(nearest[1][2]) - anomaly_radii[anomaly_type].max * 2
+							if distance >= settings.anomaly_zone_anomalies_distance_min then
+								printf("Anomaly type %s, Position data valid, distance %s, saving %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
+								position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+								valid_lvid = true
+							else
+								printf("Anomaly type %s, Position data invalid, too close, distance %s, %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
+								valid_lvid = false
+							end
+						else
+							printf("Anomaly type %s, Can't check position data %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
 							position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
 							valid_lvid = true
-						else
-							printf("Anomaly type %s, Position data invalid, too close, distance %s, %s, %s, %s", anomaly_type, distance, pos_x, pos_y, pos_z)
-							valid_lvid = false
 						end
 					else
-						printf("Anomaly type %s, Can't check position data %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
-						position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+						if position_data then
+							printf("Anomaly type %s, Position data provided, saving %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
+							position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
+						end
 						valid_lvid = true
 					end
-				else
-					if position_data then
-						printf("Anomaly type %s, Position data provided, saving %s, %s, %s", anomaly_type, pos_x, pos_y, pos_z)
-						position_data:insertAndRebuild({x = pos_x, y = pos_y, z = pos_z})
-					end
-					valid_lvid = true
-				end
-			end)
+				end)
+			end
 		end
 
 		-- Decrement the number of tries left:

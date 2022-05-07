@@ -73,7 +73,7 @@ end
 
 -- UTILS
 --Recursive print of tables similar to PHP print_r function
-local print_r = print_r or function(t) 
+local print_r = print_r or function(t)
 	local print_r_cache={}
 	local function sub_print_r(t,indent)
 		if (print_r_cache[tostring(t)]) then
@@ -156,7 +156,7 @@ local function look_at_position(pos, actor)
 	if pos then
 		local pos = vector():set(pos.x, pos.y, pos.z)
 		local actor = actor or db.actor
-	
+
 		local actor_position = device().cam_pos
 		local actor_direction = device().cam_dir
 		local look_distance = actor_position:distance_to(pos)
@@ -342,7 +342,7 @@ function get_actor_psy_table()
 	if is_not_empty(actor_psy_table) then return end
 
 	local m_data = alife_storage_manager.get_state()
-	arszi_psy.save_state(m_data) 
+	arszi_psy.save_state(m_data)
 	actor_psy_table = m_data.psy_table
 end
 
@@ -386,7 +386,7 @@ anomaly_radii = {
 	zone_radioactive_average = {min = 4, max = 6},
 	zone_radioactive_strong = {min = 4, max = 6},
 	zone_radioactive_weak = {min = 4, max = 6},
-	
+
 	zone_mine_acid = {min = 2, max = 3},
 	zone_mine_acidic_weak = {min = 2, max = 3},
 	zone_mine_acidic_average = {min = 2, max = 3},
@@ -472,7 +472,7 @@ function get_obj_restrictions(clean)
 		local min_dist
 		local nearest
 		local nearest_name
-		
+
 		for name,smart in pairs( SIMBOARD.smarts_by_names ) do
 			local dist = smart.position:distance_to(se_obj.position)
 			if (not min_dist) then
@@ -528,7 +528,7 @@ function get_obj_restrictions(clean)
 								end
 							end
 						end
-					end				
+					end
 				end
 			end
 		end
@@ -595,7 +595,7 @@ function remove_all_restrictions(level_name)
 								end
 							end
 						end
-					end				
+					end
 				end
 			end
 		end
@@ -726,8 +726,8 @@ function remove_anomaly_obj(id, level_name)
 
 		printf("removing anomaly object %s, %s, on level %s", obj:section_name(), obj.id, level_name)
 		-- obj:disable_anomaly()
-		
-		
+
+
 		local g_obj = level.object_by_id(id)
 		if g_obj and g_obj ~= 0 and g_obj:id() ~= 0 then
 			db.del_zone(g_obj)
@@ -820,7 +820,7 @@ function clean_dynamic_anomalies_on_level(level_name, dont_clean_restrictions)
 	get_obj_restrictions(not dont_clean_restrictions)
 	-- disable_anomalies_on_level(level_name)
 	-- remove_restrictions(level_name)
-	
+
 	clean_dynamic_anomalies_on_level_func(level_name)
 	-- enable_anomalies_on_level(level_name)
 	-- clean_restriction_tables()
@@ -1091,7 +1091,7 @@ function drx_da_spawn_anomalies_on_level(level_name)
 						end
 					end
 
-					while j < (smart_list_reduced[smart_name] and random(3) or anomaly_max_number) do 
+					while j < (smart_list_reduced[smart_name] and random(3) or anomaly_max_number) do
 						if random() <= (smart_list_reduced[smart_name] and 0.5 or spawn_percent) then
 							local anom_id = drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name, position_data)
 							if anom_id then
@@ -1301,7 +1301,7 @@ function drx_da_generate_position(smart_name, anomaly_type, position_data)
 		local lvid = level_vertex_id(pos)
 		if (lvid < 4294967295) then
 			pos = level_vertex_position(lvid)
-			
+
 			-- Don't check distance for certain anomalies
 			if anomaly_type and anomalies_distance_check_ignore[anomaly_type] then
 				valid_lvid = true
@@ -1481,7 +1481,7 @@ function spawn_artefacts_on_level(level_name)
 								res = allowed_artefacts[random(#allowed_artefacts)]
 							end
 
-							if not res then 
+							if not res then
 								printf("failed to pick artefact by level, pick random from allowed, level_name %s, anomaly_type %s, has artefacts_map_tiers %s, has anomaly_type_to_artefacts %s", level_name, anomaly_type, artefacts_map_tiers ~= nil, anomaly_type_to_artefacts[anomaly_type] ~= nil)
 								res = allowed_artefacts[random(#allowed_artefacts)]
 							end
@@ -1659,7 +1659,7 @@ function register_anomalies_behaviour()
 				props.update_time = t
 				props.active = true
 				obj:enable_anomaly()
-			end	
+			end
 		end
 	end)
 end
@@ -1821,11 +1821,11 @@ anomalies_near_actor_functions = {
 		local h = hit()
 		h.power = level_environment.is_actor_immune() and 0 or (1 - distance_to_sqr / radius_sqr) * 0.004
 		if h.power > 0 then
-			h.type = hit.telepatic	
+			h.type = hit.telepatic
 			h.impulse = 0
 			h.direction = VEC_Z
 			h.draftsman = actor
-			
+
 			actor:hit(h)
 
 			-- Artefacts protection
@@ -1870,7 +1870,7 @@ anomalies_near_actor_functions = {
 	zone_mine_gravitational_weak = function(anomaly, actor, distance_to_sqr, radius_sqr, power_modifier)
 		local key = "zone_mine_gravitational_weak"
 		local tg = time_global()
-		
+
 		if tg < anomalies_vars.zone_mine_gravitational_weak_tg and timed_effects[key] then return end
 		anomalies_vars.zone_mine_gravitational_weak_tg = tg + 1000
 
@@ -2100,7 +2100,7 @@ anomalies_near_actor_functions = {
 		if not anomalies_sec_to_obj.zone_mine_point then build_anomalies_pos_tree() end
 		local closest_mine = anomalies_sec_to_obj.zone_mine_point:nearest(actor:position())
 		local mine_factor = (closest_mine and min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
-		
+
 		-- PDA glitching, set value for binder, patch binder, see below
 		pda_glitch_value = clamp(1 - mine_factor, 0, 1)
 		add_simple_timed_effect(0.2, nil, function()
@@ -2208,7 +2208,7 @@ anomalies_spawn_functions = {
 				prev_pos_z = offset_z
 
 				i = i + i_step
-				j = j + j_step				
+				j = j + j_step
 			end, nil, key)
 		end
 	end,
@@ -2260,7 +2260,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	bind_anomaly_field_update(self, delta)
 	if not self.object then return end
 
-	local section = self.section 
+	local section = self.section
 	if anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		-- Behaviour radius in priorities
@@ -2384,7 +2384,7 @@ anomalies_hit_functions = {
 			actor:set_health_ex(health)
 			actor:change_health(-random_float(0.01, 0.04))
 
-			-- Change thirst and sleep, params are from vanilla actor_status_sleep/thirst scripts 
+			-- Change thirst and sleep, params are from vanilla actor_status_sleep/thirst scripts
 			local sleep_params = {
 				step = 27,
 				check_after_sec = 300,
@@ -2612,7 +2612,7 @@ function open_anomaly_article(section)
 		printf("article already opened for %s", section)
 		return
 	end
-	
+
 	-- Return if the player didn't spend 3 hours in the zone
 	if not (has_alife_info("actor_spent_2_hrs_in_zone") or utils_obj.is_time_spent_in_zone(0,0,2)) then
 		printf("youre too stupid for article boy")
@@ -2628,7 +2628,7 @@ function open_anomaly_article(section)
 
 	-- Instance of the pda_ui object.
 	local pda_ui = ui_pda_encyclopedia_tab.get_ui()
-	pda_ui:InitCategories() 
+	pda_ui:InitCategories()
 	pda_ui:SelectCategory("encyclopedia_anomalies")
 	pda_ui:SelectArticle(additional_articles_to_category.encyclopedia_anomalies[section])
 	if pda_ui.article_list and pda_ui.article_list.GetSelectedIndex then
@@ -2733,7 +2733,7 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 
 						if not anomalies_by_smart[smart_name] then anomalies_by_smart[smart_name] = {} end
 						local j = size_table(anomalies_by_smart[smart_name])
-						while j < anomaly_max_number do 
+						while j < anomaly_max_number do
 							if random() <= spawn_percent then
 								to_generate[#to_generate + 1] = {
 									anomaly_type = anomaly_type,

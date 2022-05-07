@@ -1454,7 +1454,7 @@ function spawn_artefacts_on_level(level_name)
 
 							local res
 							if artefacts_map_tiers and random(100) > settings.random_artefact_spawn_chance then
-								local tries = 20
+								local tries = 40
 								while tries > 0 and (not res or not allowed_artefacts_flipped[res]) do
 									if anomaly_type_to_artefacts[anomaly_type] then
 										local t = {}

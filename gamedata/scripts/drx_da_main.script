@@ -2663,7 +2663,7 @@ function open_anomaly_article(section)
 		pda_ui.article_list:SetSelectedIndex(pda_ui.article_list:GetSelectedIndex() + 1)
 	end
 
-	if zz_Encyclopedia_messages_restored then
+	if zz_Encyclopedia_messages_restored or zz_encyclopedia_messages_restored or encyclopedia_messages_restored then
 		-- Article and category texts.
 		local message = game.translate_string("pda_encyclopedia_notify")
 		--printf("Monkeyzz " .. categories[index_c].section)

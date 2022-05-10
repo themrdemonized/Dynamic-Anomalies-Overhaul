@@ -2243,7 +2243,8 @@ function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 	local nearest = anomalies_sec_to_obj[sec]:nearest(actor:position())
 	local factor = 1 - (nearest and min(nearest[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
 
-	if actor:item_in_slot(9):section() == "detector_anomaly" then
+	local detector = actor:item_in_slot(9)
+	if detector and detector:section() == "detector_anomaly" then
 		local ui = tasks_measure.get_UI()
 		if ui then
 			for i = 1, ui.step_tot do
@@ -2259,7 +2260,7 @@ function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 		end
 	end
 	
-	if 	(game_difficulties.get_game_factor("notify_anomaly") or actor:item_in_slot(9):section() == "detector_scientific")
+	if 	(game_difficulties.get_game_factor("notify_anomaly") or (detector and detector:section() == "detector_scientific"))
 	and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
 	then
 		if not anomaly.sound_threshold then anomaly.sound_threshold = 0 end

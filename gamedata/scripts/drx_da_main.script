@@ -1668,6 +1668,22 @@ end
 anomalies_pos_tree = nil
 anomalies_obj_to_pos = {}
 anomalies_sec_to_obj = {}
+
+common_sec = {
+	zone_mine_electric = "zone_mine_electric",
+	zone_mine_electric_weak = "zone_mine_electric",
+	zone_mine_electric_average = "zone_mine_electric",
+	zone_mine_electric_strong = "zone_mine_electric",
+	zone_mine_static = "zone_mine_electric",
+	zone_mine_static_weak = "zone_mine_electric",
+	zone_mine_static_average = "zone_mine_electric",
+	zone_mine_static_strong = "zone_mine_electric",
+	zone_witches_galantine = "zone_mine_electric",
+	zone_witches_galantine_weak = "zone_mine_electric",
+	zone_witches_galantine_average = "zone_mine_electric",
+	zone_witches_galantine_strong = "zone_mine_electric",
+}
+
 function build_anomalies_pos_tree()
 	local alife_release_id = alife_release_id
 	local gg = game_graph()
@@ -1689,20 +1705,7 @@ function build_anomalies_pos_tree()
 	local obj_to_pos = {}
 	local sec_to_obj = {}
 
-	local common_sec = {
-		zone_mine_electric = "zone_mine_electric",
-		zone_mine_electric_weak = "zone_mine_electric",
-		zone_mine_electric_average = "zone_mine_electric",
-		zone_mine_electric_strong = "zone_mine_electric",
-		zone_mine_static = "zone_mine_electric",
-		zone_mine_static_weak = "zone_mine_electric",
-		zone_mine_static_average = "zone_mine_electric",
-		zone_mine_static_strong = "zone_mine_electric",
-		zone_witches_galantine = "zone_mine_electric",
-		zone_witches_galantine_weak = "zone_mine_electric",
-		zone_witches_galantine_average = "zone_mine_electric",
-		zone_witches_galantine_strong = "zone_mine_electric",
-	}
+	
 
 	for i = 1, 65534 do
 		local obj = get_anomaly_obj(i, level_name)
@@ -2234,6 +2237,7 @@ anomaly_detectors = {
 
 function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 	local sec = anomaly.section
+	sec = common_sec[sec] or sec
 
 	if not anomalies_sec_to_obj[sec] then build_anomalies_pos_tree() end
 	local nearest = anomalies_sec_to_obj[sec]:nearest(actor:position())

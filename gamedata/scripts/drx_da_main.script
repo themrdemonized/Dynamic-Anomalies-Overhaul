@@ -369,6 +369,7 @@ reduced_chance_levels = {
 	l03u_agr_underground = true,
 	l04_darkvalley = true,
 	l04u_labx18 = true,
+	l05_bar = true,
 	l10_radar = true,
 	jupiter_underground = true,
 	jupiter = true,
@@ -1856,7 +1857,7 @@ anomalies_near_actor_functions = {
 			register_callback("actor_on_before_hit", function(s_hit, bone_id, flags)
 				if s_hit.type == hit.fire_wound then
 					s_hit.power = s_hit.power * random_float(0, 0.5)
-					play_sound_on_actor("\\eugenium_anomaly\\sphere\\sphere_blowout.ogg", 0.9, random_float(0.95, 1.05))
+					play_sound_on_actor("eugenium_anomaly\\sphere\\sphere_blowout", 0.9, random_float(0.95, 1.05))
 				end
 			end, nil, key)
 		end
@@ -2226,6 +2227,23 @@ anomalies_destroy_functions = {
 
 }
 
+anomaly_detectors = {
+	detector_anomaly = true,
+	detector_scientific = true,
+}
+
+function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
+	if not (drx_da_main_mcm.new_anomalies_sections[anomaly.section] or drx_da_main_mcm.variations_anomalies_sections[anomaly.section]) then return end
+
+	if not anomaly.sound_threshold then anomaly.sound_threshold = 0 end
+	anomaly.sound_threshold = anomaly.sound_threshold + (1 - distance_to_sqr / radius_sqr)
+	if anomaly.sound_threshold > 1 then
+		play_sound_on_actor("detectors\\da-2_beep1")
+		anomaly.sound_threshold = 0
+	end
+	
+end
+
 bind_anomaly_field_spawn = bind_anomaly_field.anomaly_field_binder.net_spawn
 bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	if not bind_anomaly_field_spawn(self, se_abstract) then
@@ -2275,8 +2293,18 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 		local radius_sqr = radius * radius
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr then
+			-- Open anomaly article
 			open_anomaly_article(section)
-			if anomalies_near_actor_functions[section] then anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr) end
+
+			-- Beep near anoms if option enabled or have Svarog or Anomaly Detector
+			if game_difficulties.get_game_factor("notify_anomaly") or (actor:item_in_slot(9) and anomaly_detectors[actor:item_in_slot(9):section()]) then
+				notify_anomaly(self, actor, distance_to_sqr, radius_sqr)
+			end
+
+			-- Behaviour near actor
+			if anomalies_near_actor_functions[section] then
+				anomalies_near_actor_functions[section](self, actor, distance_to_sqr, radius_sqr)
+			end
 
 			-- printf("actor near anomaly %s, firing effect, delta %s", section, delta)
 		end
@@ -2633,6 +2661,18 @@ function open_anomaly_article(section)
 	pda_ui:SelectArticle(additional_articles_to_category.encyclopedia_anomalies[section])
 	if pda_ui.article_list and pda_ui.article_list.GetSelectedIndex then
 		pda_ui.article_list:SetSelectedIndex(pda_ui.article_list:GetSelectedIndex() + 1)
+	end
+
+	if zz_Encyclopedia_messages_restored then
+		-- Article and category texts.
+		local message = game.translate_string("pda_encyclopedia_notify")
+		--printf("Monkeyzz " .. categories[index_c].section)
+		local text_c = game.translate_string("encyclopedia_anomalies")
+		local text_a = game.translate_string(additional_articles_to_category.encyclopedia_anomalies[section])
+		-- Other information.
+		local header = game.translate_string("st_tip")
+		local texture = news_manager.tips_icons["guide_unlock"] or "ui_inGame2_Poslednie_razrabotki"
+		db.actor:give_game_news(header, strformat(message, text_c, text_a), texture, 0, 5000, 0)
 	end
 end
 

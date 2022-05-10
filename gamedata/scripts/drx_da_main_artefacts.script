@@ -94,6 +94,7 @@ end)()
 -- If defined, the chances from table will be used instead of default ones or from MCM
 
 artefacts_map_chances = {
+	["k01_darkscape"] = 35,
 	["l03u_agr_underground"] = 50,
 	["l04u_labx18"] = 60,
 	["l08u_brainlab"] = 60,

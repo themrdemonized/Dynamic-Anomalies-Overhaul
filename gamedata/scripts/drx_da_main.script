@@ -2324,12 +2324,13 @@ detector_functions = {
 		end
 
 		-- Play sound when detector is active
-		if actor:active_detector() then
-			if 	(game_difficulties.get_game_factor("notify_anomaly") and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec]))
-			or 	(not game_difficulties.get_game_factor("notify_anomaly"))
-			then
-				self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
-			end
+		local play_sound = false
+
+		if 	game_difficulties.get_game_factor("notify_anomaly")
+		and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
+		or 	(not game_difficulties.get_game_factor("notify_anomaly") and actor:active_detector())
+		then
+			self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
 		end
 	end,
 
@@ -2346,6 +2347,8 @@ function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 	local sec = detector and detector:section()
 	if sec and detector_functions[sec] then
 		detector_functions[sec](detector_functions, anomaly, actor, distance_to_sqr, radius_sqr)
+	elseif game_difficulties.get_game_factor("notify_anomaly") and (drx_da_main_mcm.new_anomalies_sections[anomaly.section] or drx_da_main_mcm.variations_anomalies_sections[anomaly.section]) then
+		detector_functions:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
 	end
 end
 

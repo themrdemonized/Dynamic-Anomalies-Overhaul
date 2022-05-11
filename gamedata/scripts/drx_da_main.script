@@ -2235,9 +2235,23 @@ anomaly_detectors = {
 	detector_scientific = true,
 }
 
+anomaly_detector_ignore = {
+	zone_field_radioactive = true,
+	zone_field_radioactive_average = true,
+	zone_field_radioactive_strong = true,
+	zone_field_radioactive_weak = true,
+	zone_radioactive = true,
+	zone_radioactive_average = true,
+	zone_radioactive_strong = true,
+	zone_radioactive_weak = true,
+	zone_mine_ghost = true,
+}
+
 function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 	local sec = anomaly.section
 	sec = common_sec[sec] or sec
+
+	if anomaly_detector_ignore[sec] then return end
 
 	if not anomalies_sec_to_obj[sec] then build_anomalies_pos_tree() end
 	local nearest = anomalies_sec_to_obj[sec]:nearest(actor:position())

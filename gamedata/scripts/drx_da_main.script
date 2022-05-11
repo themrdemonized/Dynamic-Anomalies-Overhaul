@@ -2324,8 +2324,6 @@ detector_functions = {
 		end
 
 		-- Play sound when detector is active
-		local play_sound = false
-
 		if 	game_difficulties.get_game_factor("notify_anomaly")
 		and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
 		or 	(not game_difficulties.get_game_factor("notify_anomaly") and actor:active_detector())

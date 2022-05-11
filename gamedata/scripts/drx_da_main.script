@@ -2239,11 +2239,6 @@ anomalies_destroy_functions = {
 
 }
 
-anomaly_detectors = {
-	detector_anomaly = true,
-	detector_scientific = true,
-}
-
 anomaly_detector_ignore = {
 	zone_field_radioactive = true,
 	zone_field_radioactive_average = true,
@@ -2304,42 +2299,54 @@ function find_nearest_anomaly()
 	return distance, anom_id, anom_pos
 end
 
-function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
-	local sec = anomaly.section
-	sec = common_sec[sec] or sec
-
-	if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
-	local nearest = find_nearest_anomaly()
-	local factor = 1 - (nearest and min(nearest, distance_to_sqr) or distance_to_sqr) / radius_sqr
-
-	local detector = actor:item_in_slot(9)
-	if detector and detector:section() == "detector_anomaly" then
-		local ui = tasks_measure.get_UI()
-		if ui and ui.step <= 0 then
-			for i = 1, ui.step_tot do
-				ui.m_seg[i]:InitTextureEx(i <= min(ui.step_tot, ceil(factor * 10)) and "green_seg_ano" or "green_black_ano", "hud\\p3d")
-			end
-		end
-	else
-		local ui = tasks_measure.get_UI()
-		if ui and ui.step <= 0 then
-			for i = 1, ui.step_tot do
-				ui.m_seg[i]:InitTextureEx("green_black_ano", "hud\\p3d")
-			end
-		end
-	end
-	
-	if 	(game_difficulties.get_game_factor("notify_anomaly") or (detector and detector:section() == "detector_scientific"))
-	and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
-	then
+detector_functions = {
+	play_anomaly_sound = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
 		if not anomaly.sound_threshold then anomaly.sound_threshold = 0 end
 		anomaly.sound_threshold = anomaly.sound_threshold + (1 - distance_to_sqr / radius_sqr) ^ 2
 		if anomaly.sound_threshold > 1 then
 			play_sound_on_actor("detectors\\da-2_beep1")
 			anomaly.sound_threshold = 0
 		end
+	end,
+
+	detector_anomaly = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
+		local sec = anomaly.section
+
+		if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
+		local nearest = find_nearest_anomaly()
+		local factor = 1 - (nearest and min(nearest, distance_to_sqr) or distance_to_sqr) / radius_sqr
+
+		local ui = tasks_measure.get_UI()
+		if ui and ui.step <= 0 then
+			for i = 1, ui.step_tot do
+				ui.m_seg[i]:InitTextureEx(i <= min(ui.step_tot, ceil(factor * 10)) and "green_seg_ano" or "green_black_ano", "hud\\p3d")
+			end
+		end
+
+		-- Play sound when detector is active
+		if actor:active_detector() then
+			if 	(game_difficulties.get_game_factor("notify_anomaly") and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec]))
+			or 	(not game_difficulties.get_game_factor("notify_anomaly"))
+			then
+				self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
+			end
+		end
+	end,
+
+	detector_scientific = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
+		local sec = anomaly.section
+		if drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec] then
+			self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
+		end
 	end
-	
+}
+
+function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
+	local detector = actor:item_in_slot(9)
+	local sec = detector and detector:section()
+	if sec and detector_functions[sec] then
+		detector_functions[sec](detector_functions, anomaly, actor, distance_to_sqr, radius_sqr)
+	end
 end
 
 bind_anomaly_field_spawn = bind_anomaly_field.anomaly_field_binder.net_spawn

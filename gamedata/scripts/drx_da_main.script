@@ -1667,6 +1667,7 @@ end
 
 anomalies_pos_tree = nil
 detectable_anomalies_pos_tree = nil
+detectable_anomalies_ids = {}
 anomalies_obj_to_pos = {}
 anomalies_sec_to_obj = {}
 
@@ -1733,20 +1734,22 @@ function build_anomalies_pos_tree()
 	-- 	anomalies_obj_to_pos = anomalies_pos_tree and obj_to_pos
 	-- end)
 
-	local detectable_anomalies_ids = {}
+	empty_table(detectable_anomalies_ids)
+	local t = {}
 	for k, v in pairs(sec_to_obj) do
 		if sec_to_obj[k] then
 			local ids = {}
 			for k1, v1 in pairs(sec_to_obj[k]) do
 				ids[#ids + 1] = v1.id
 				if not anomaly_detector_ignore[v1.section] then
-					detectable_anomalies_ids[#detectable_anomalies_ids + 1] = v1.id
+					detectable_anomalies_ids[v1.id] = v1.position
+					t[#t + 1] = v1.id
 				end
 			end
 			anomalies_sec_to_obj[k] = kd_tree.buildTreeSeObjectIds(ids)
 		end
 	end
-	detectable_anomalies_pos_tree = kd_tree.buildTreeSeObjectIds(detectable_anomalies_ids)
+	detectable_anomalies_pos_tree = kd_tree.buildTreeSeObjectIds(t)
 end
 
 
@@ -2266,14 +2269,38 @@ anomaly_detector_ignore = {
 	campfire = true,
 }
 
+function find_nearest_anomaly()
+	local actor = db.actor
+	local actor_pos = actor:position()
+	local actor_pos_distance = actor_pos.distance_to_sqr
+	local distance = math.huge
+	local anom_id
+	local anom_pos
+
+	local pairs = pairs
+
+	for id, _ in pairs(detectable_anomalies_ids) do
+		local obj = level.object_by_id(id)
+		if obj then
+			local d = actor_pos_distance(actor_pos, obj:position())
+			if d < distance then
+				distance = d
+				anom_id = id
+				anom_pos = pos
+			end
+		end
+	end
+
+	return distance, anom_id, anom_pos
+end
+
 function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
 	local sec = anomaly.section
 	sec = common_sec[sec] or sec
 
-	if not detectable_anomalies_pos_tree then build_anomalies_pos_tree() end
-	kd_tree.updateObjPositions(detectable_anomalies_pos_tree)
-	local nearest = detectable_anomalies_pos_tree:nearest(actor:position())
-	local factor = 1 - (nearest and min(nearest[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
+	if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
+	local nearest = find_nearest_anomaly()
+	local factor = 1 - (nearest and min(nearest, distance_to_sqr) or distance_to_sqr) / radius_sqr
 
 	local detector = actor:item_in_slot(9)
 	if detector and detector:section() == "detector_anomaly" then
@@ -2314,6 +2341,10 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	self.spawn_position = self.object:position()
 	if not self.section then self.section = self.object:section() end
 
+	if not anomaly_detector_ignore[self.section] then
+		detectable_anomalies_ids[self.object:id()] = self.spawn_position
+	end
+
 	local section = self.section
 	if anomalies_spawn_functions[section] then
 		anomalies_spawn_functions[section](self)
@@ -2326,6 +2357,9 @@ bind_anomaly_field_destroy = bind_anomaly_field.anomaly_field_binder.net_destroy
 bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
 	if not self.section then self.section = self.object:section() end
 	local section = self.section
+
+	detectable_anomalies_ids[self.object:id()] = nil
+
 	if anomalies_destroy_functions[section] then
 		anomalies_destroy_functions[section](self)
 	end

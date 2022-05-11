@@ -2278,10 +2278,12 @@ function find_nearest_anomaly()
 	local anom_pos
 
 	local pairs = pairs
+	level_object_by_id = level.object_by_id
 
 	for id, _ in pairs(detectable_anomalies_ids) do
-		local obj = level.object_by_id(id)
+		local obj = level_object_by_id(id)
 		if obj then
+			local enabled = true
 			local d = actor_pos_distance(actor_pos, obj:position())
 			if d < distance then
 				distance = d

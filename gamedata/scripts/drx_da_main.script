@@ -2148,7 +2148,7 @@ anomalies_spawn_functions = {
 			local obj_set_anomaly_position = obj.set_anomaly_position
 			local vector = vector()
 			local vector_set = vector.set
-			local key = "zone_mine_ghost_" .. obj:id()
+			local key = obj:name()
 
 			local sin_lut = anomalies_vars.sin_lut
 			local cos_lut = anomalies_vars.cos_lut
@@ -2233,7 +2233,7 @@ anomalies_destroy_functions = {
 
 	-- Ghost, destroy callback for wandering
 	zone_mine_ghost = function(anomaly)
-		local key = "zone_mine_ghost_" .. anomaly.object:id()
+		local key = anomaly.object:name()
 		unregister_callback(key)
 	end,
 
@@ -2264,7 +2264,7 @@ anomaly_detector_ignore = {
 	campfire = true,
 }
 
-function find_nearest_anomaly()
+function find_nearest_anomaly(force_enabled)
 	local actor = db.actor
 	local actor_pos = actor:position()
 	local actor_pos_distance = actor_pos.distance_to_sqr
@@ -2281,10 +2281,14 @@ function find_nearest_anomaly()
 		local obj = level_object_by_id(id)
 		if obj then
 			local enabled = true
-			local props = updated_anomaly_levels[level_name].anomalies_properties[id]
-			if props and props.active ~= nil then
-				enabled = props.active
+
+			if not force_enabled then
+				local props = updated_anomaly_levels[level_name].anomalies_properties[id]
+				if props and props.active ~= nil then
+					enabled = props.active
+				end
 			end
+
 			if enabled then
 				local pos = obj:position()
 				local d = actor_pos_distance(actor_pos, pos)
@@ -2302,6 +2306,7 @@ function find_nearest_anomaly()
 end
 
 detector_functions = {
+	-- Play sound
 	play_anomaly_sound = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
 		if not anomaly.sound_threshold then anomaly.sound_threshold = 0 end
 		anomaly.sound_threshold = anomaly.sound_threshold + (1 - distance_to_sqr / radius_sqr) ^ 2
@@ -2311,21 +2316,35 @@ detector_functions = {
 		end
 	end,
 
-	detector_anomaly = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
+	-- Store anomaly factors to find biggest one for correct display of anomaly_detector bars
+	detector_anomaly_factors = {},
+	detector_anomaly_add_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+		self.detector_anomaly_factors[anomaly.object:name()] = 1 - distance_to_sqr / radius_sqr
+	end,
+	detector_anomaly_remove_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+		self.detector_anomaly_factors[anomaly.object:name()] = nil
+	end,
+	detector_anomaly_find_max_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+		if is_empty(self.detector_anomaly_factors) then
+			return 1 - distance_to_sqr / radius_sqr
+		end
+
+		local factor = 0
+		for k, v in pairs(self.detector_anomaly_factors) do
+			if v > factor then
+				factor = v
+			end
+		end
+		return factor
+	end,
+
+	detector_anomaly = function(self, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+		if not custom_callback then return end
 		if actor:active_detector() then
 			local sec = anomaly.section
 
-			if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
-			local nearest, anom_id, anom_sec, anom_pos = find_nearest_anomaly()
-			local factor
-			if nearest then
-				factor = max(
-					1 - distance_to_sqr / radius_sqr,
-					1 - nearest / get_anomaly_behaviour_radius(anom_sec)
-				)
-			else
-				factor = 1 - distance_to_sqr / radius_sqr
-			end
+			self:detector_anomaly_add_factor(anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+			local factor = self:detector_anomaly_find_max_factor(anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
 
 			local ui = tasks_measure.get_UI()
 			if ui and ui.step <= 0 then
@@ -2351,7 +2370,8 @@ detector_functions = {
 		end
 	end,
 
-	detector_scientific = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
+	detector_scientific = function(self, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+		if custom_callback then return end
 		local sec = anomaly.section
 		if drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec] then
 			self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
@@ -2359,16 +2379,17 @@ detector_functions = {
 	end
 }
 
-function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr)
+function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
 	local detector = actor:item_in_slot(9)
 	local sec = detector and detector:section()
 	if sec and detector_functions[sec] then
-		detector_functions[sec](detector_functions, anomaly, actor, distance_to_sqr, radius_sqr)
-	elseif game_difficulties.get_game_factor("notify_anomaly") and (drx_da_main_mcm.new_anomalies_sections[anomaly.section] or drx_da_main_mcm.variations_anomalies_sections[anomaly.section]) then
+		detector_functions[sec](detector_functions, anomaly, actor, distance_to_sqr, radius_sqr, custom_callback)
+	elseif game_difficulties.get_game_factor("notify_anomaly") and (drx_da_main_mcm.new_anomalies_sections[anomaly.section] or drx_da_main_mcm.variations_anomalies_sections[anomaly.section]) and not custom_callback then
 		detector_functions:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
 	end
 end
 
+local on_update_timer = 100
 bind_anomaly_field_spawn = bind_anomaly_field.anomaly_field_binder.net_spawn
 bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	if not bind_anomaly_field_spawn(self, se_abstract) then
@@ -2376,7 +2397,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	end
 
 	self.spawn_position = self.object:position()
-	if not self.section then self.section = self.object:section() end
+	self.section = self.object:section()
 
 	if not anomaly_detector_ignore[self.section] then
 		detectable_anomalies_ids[self.object:id()] = self.spawn_position
@@ -2387,12 +2408,34 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		anomalies_spawn_functions[section](self)
 	end
 
+	-- Update callback similar to binder update, but works even if anomaly is disabled
+	self.on_update_time = time_global() + random(on_update_timer, on_update_timer * 10)
+	self.update_key = self.object:name() .. "_update"
+	self.radius_sqr = get_anomaly_behaviour_radius(section)
+	register_callback("actor_on_update", function()		
+		local tg = time_global()
+		if tg < self.on_update_time then return end
+		self.on_update_time = tg + on_update_timer
+
+		-- Get behaviour radius and check if actor inside it, then apply effect
+		local actor = db.actor
+		local radius_sqr = self.radius_sqr
+		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
+		if distance_to_sqr <= radius_sqr then
+			-- Beep near anoms even if disabled for anomaly_detector
+			if not anomaly_detector_ignore[section] then
+				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
+			end
+		else
+			detector_functions.detector_anomaly_remove_factor(detector_functions, self, actor, distance_to_sqr, radius_sqr, true)
+		end
+	end, nil, self.update_key)
+
 	return true
 end
 
 bind_anomaly_field_destroy = bind_anomaly_field.anomaly_field_binder.net_destroy
 bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
-	if not self.section then self.section = self.object:section() end
 	local section = self.section
 
 	detectable_anomalies_ids[self.object:id()] = nil
@@ -2400,6 +2443,8 @@ bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
 	if anomalies_destroy_functions[section] then
 		anomalies_destroy_functions[section](self)
 	end
+
+	unregister_callback(self.update_key)
 
 	bind_anomaly_field_destroy(self)
 end
@@ -2427,7 +2472,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 		
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		local actor = db.actor
-		local radius_sqr = get_anomaly_behaviour_radius(section)
+		local radius_sqr = self.radius_sqr
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr then
 			-- Open anomaly article
@@ -2435,7 +2480,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 
 			-- Beep near anoms if option enabled or have Svarog or Anomaly Detector
 			if not anomaly_detector_ignore[section] then
-				notify_anomaly(self, actor, distance_to_sqr, radius_sqr)
+				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, false)
 			end
 
 			-- Behaviour near actor

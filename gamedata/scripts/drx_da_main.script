@@ -1752,7 +1752,6 @@ function build_anomalies_pos_tree()
 	detectable_anomalies_pos_tree = kd_tree.buildTreeSeObjectIds(t)
 end
 
-
 local anomalies_vars = {
 	-- Quick lookup of sine values by degrees
 	sin_lut = (function()
@@ -1772,12 +1771,65 @@ local anomalies_vars = {
 		return t
 	end)(),
 
+	-- Current anomaly factors
+	factors = {},
+	add_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr, section, factor)
+		self.factors[anomaly.object:name()] = {
+			section = section or anomaly.object:section(),
+			factor = factor or 1 - distance_to_sqr / radius_sqr
+		}
+	end,
+	remove_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
+		self.factors[anomaly.object:name()] = nil
+	end,
+	find_max_factor = function(self, anomaly, actor, distance_to_sqr, radius_sqr, condition)
+		if is_empty(self.factors) then
+			return 1 - distance_to_sqr / radius_sqr
+		end
+
+		local factor = 0
+		if condition == nil or condition == true then
+			condition = function() return true end
+		elseif condition == false then
+			condition = function() return false end
+		end
+
+		for k, v in pairs(self.factors) do
+			if v.factor > factor and condition(v) then
+				factor = v.factor
+			end
+		end
+		return factor
+	end,
+	find_factor_sum = function(self, anomaly, actor, distance_to_sqr, radius_sqr, condition)
+		if is_empty(self.factors) then
+			return 1 - distance_to_sqr / radius_sqr
+		end
+
+		local factor = 0
+		if condition == nil or condition == true then
+			condition = function() return true end
+		elseif condition == false then
+			condition = function() return false end
+		end
+
+		for k, v in pairs(self.factors) do
+			if condition(v) then
+				factor = factor + v.factor
+			end
+		end
+		return factor
+	end,
+
 	zone_mine_gravitational_weak_tg = 0,
 	zone_mine_electric_tg = 0,
 	zone_mine_electric_pp_effectors = {
 		{code = 98324, file = "electra_mine.ppe", factor = 0.5},
 		{code = 98325, file = "electra.ppe", factor = 1},
 	},
+	zone_mine_electric_factor_function = function(factors)
+		return factors.section == "zone_mine_electric"
+	end
 }
 
 -- Defined radius of anomalies behaviour
@@ -2025,13 +2077,12 @@ anomalies_near_actor_functions = {
 			end
 		end
 
-		if not anomalies_sec_to_obj.zone_mine_electric then build_anomalies_pos_tree() end
-		local closest_mine = anomalies_sec_to_obj.zone_mine_electric:nearest(actor:position())
-		local mine_factor = (closest_mine and min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
+		anomalies_vars:add_factor(anomaly, actor, distance_to_sqr, radius_sqr, "zone_mine_electric", (1 - distance_to_sqr / radius_sqr) ^ 2)
+		local mine_factor = clamp(anomalies_vars:find_factor_sum(anomaly, actor, distance_to_sqr, radius_sqr, anomalies_vars.zone_mine_electric_factor_function), 0, 1)
 
 		-- PPE effector
 		local effector_modifier = effector_modifier or 0.66
-		local effector_power = (1.05 - mine_factor) ^ 2 * effector_modifier
+		local effector_power = (mine_factor + 0.05) * effector_modifier
 		local pps = anomalies_vars.zone_mine_electric_pp_effectors
 		for i = 1, #pps do
 			local key = "zone_mine_electric" .. pps[i].code
@@ -2047,7 +2098,7 @@ anomalies_near_actor_functions = {
 		end
 
 		-- PDA glitching, set value for binder, patch binder, see below
-		pda_glitch_value = clamp(1 - mine_factor, 0, 1)
+		pda_glitch_value = clamp(mine_factor ^ 0.5, 0, 1)
 		add_simple_timed_effect(0.2, nil, function()
 			pda_glitch_value = nil
 		end, "zone_mine_electric_pda_glitch", 1)
@@ -2110,12 +2161,11 @@ anomalies_near_actor_functions = {
 			end
 		end
 
-		if not anomalies_sec_to_obj.zone_mine_point then build_anomalies_pos_tree() end
-		local closest_mine = anomalies_sec_to_obj.zone_mine_point:nearest(actor:position())
-		local mine_factor = (closest_mine and min(closest_mine[1][2], distance_to_sqr) or distance_to_sqr) / radius_sqr
+		anomalies_vars:add_factor(anomaly, actor, distance_to_sqr, radius_sqr, "zone_mine_electric", (1 - distance_to_sqr / radius_sqr) ^ 2)
+		local mine_factor = clamp(anomalies_vars:find_factor_sum(anomaly, actor, distance_to_sqr, radius_sqr, anomalies_vars.zone_mine_electric_factor_function), 0, 1)
 
 		-- PDA glitching, set value for binder, patch binder, see below
-		pda_glitch_value = clamp(1 - mine_factor, 0, 1)
+		pda_glitch_value = clamp(mine_factor ^ 0.5, 0, 1)
 		add_simple_timed_effect(0.2, nil, function()
 			pda_glitch_value = nil
 		end, "zone_mine_electric_pda_glitch", 1)
@@ -2489,6 +2539,8 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 			end
 
 			-- printf("actor near anomaly %s, firing effect, delta %s", section, delta)
+		else
+			anomalies_vars.remove_factor(anomalies_vars, self, actor, distance_to_sqr, radius_sqr)
 		end
 	end
 end

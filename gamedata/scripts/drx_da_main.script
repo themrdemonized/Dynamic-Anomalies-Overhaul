@@ -1941,8 +1941,10 @@ anomalies_near_actor_functions = {
 
 		local power_modifier = (power_modifier or 2) * settings.gravitational_shake_modifier
 		local earthquake_cam_eff = 98323
-		local power = (1.03 - distance_to_sqr / radius_sqr) * power_modifier
-		level.add_cam_effector("camera_effects\\earthquake_40.anm", earthquake_cam_eff, false, "", 0, false, power)
+		if power_modifier > 0 then
+			local power = (1.03 - distance_to_sqr / radius_sqr) * power_modifier
+			level.add_cam_effector("camera_effects\\earthquake_40.anm", earthquake_cam_eff, false, "", 0, false, power)
+		end
 
 		add_simple_timed_effect(1, nil, function()
 			level.remove_cam_effector(earthquake_cam_eff)

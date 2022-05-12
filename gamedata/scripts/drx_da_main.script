@@ -2271,6 +2271,7 @@ function find_nearest_anomaly()
 	local distance = math.huge
 	local anom_id
 	local anom_pos
+	local anom_sec
 
 	local pairs = pairs
 	local level_object_by_id = level.object_by_id
@@ -2291,12 +2292,13 @@ function find_nearest_anomaly()
 					distance = d
 					anom_id = id
 					anom_pos = pos
+					anom_sec = obj:section()
 				end
 			end
 		end
 	end
 
-	return distance, anom_id, anom_pos
+	return distance, anom_id, anom_sec, anom_pos
 end
 
 detector_functions = {
@@ -2310,25 +2312,42 @@ detector_functions = {
 	end,
 
 	detector_anomaly = function(self, anomaly, actor, distance_to_sqr, radius_sqr)
-		local sec = anomaly.section
+		if actor:active_detector() then
+			local sec = anomaly.section
 
-		if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
-		local nearest = find_nearest_anomaly()
-		local factor = 1 - (nearest and min(nearest, distance_to_sqr) or distance_to_sqr) / radius_sqr
-
-		local ui = tasks_measure.get_UI()
-		if ui and ui.step <= 0 then
-			for i = 1, ui.step_tot do
-				ui.m_seg[i]:InitTextureEx(i <= min(ui.step_tot, ceil(factor * 10)) and "green_seg_ano" or "green_black_ano", "hud\\p3d")
+			if is_empty(detectable_anomalies_ids) then build_anomalies_pos_tree() end
+			local nearest, anom_id, anom_sec, anom_pos = find_nearest_anomaly()
+			local factor
+			if nearest then
+				factor = max(
+					1 - distance_to_sqr / radius_sqr,
+					1 - nearest / get_anomaly_behaviour_radius(anom_sec)
+				)
+			else
+				factor = 1 - distance_to_sqr / radius_sqr
 			end
-		end
 
-		-- Play sound when detector is active
-		if 	game_difficulties.get_game_factor("notify_anomaly")
-		and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
-		or 	(not game_difficulties.get_game_factor("notify_anomaly") and actor:active_detector())
-		then
-			self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
+			local ui = tasks_measure.get_UI()
+			if ui and ui.step <= 0 then
+				for i = 1, ui.step_tot do
+					ui.m_seg[i]:InitTextureEx(i <= min(ui.step_tot, ceil(factor * 10)) and "green_seg_ano" or "green_black_ano", "hud\\p3d")
+				end
+			end
+
+			-- Play sound when detector is active
+			if 	game_difficulties.get_game_factor("notify_anomaly")
+			and (drx_da_main_mcm.new_anomalies_sections[sec] or drx_da_main_mcm.variations_anomalies_sections[sec])
+			or 	(not game_difficulties.get_game_factor("notify_anomaly") and actor:active_detector())
+			then
+				self:play_anomaly_sound(anomaly, actor, distance_to_sqr, radius_sqr)
+			end
+		else
+			local ui = tasks_measure.get_UI()
+			if ui and ui.step <= 0 then
+				for i = 1, ui.step_tot do
+					ui.m_seg[i]:InitTextureEx("green_black_ano", "hud\\p3d")
+				end
+			end
 		end
 	end,
 
@@ -2385,6 +2404,18 @@ bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
 	bind_anomaly_field_destroy(self)
 end
 
+-- Behaviour radius in priorities
+--    1. anomalies_near_actor_radii[section] -- specially defined behaviour radius
+--    2. anomaly_radii[section].max -- defined hit radius of anomaly
+--    3. max_radius -- max hit radius defined in level config
+--    4. 3 -- default radius
+--    5. p.2,3,4 or 5 is then added 1 and multiplied by 2
+function get_anomaly_behaviour_radius(section)
+	local radius = anomalies_near_actor_radii[section] or (((anomaly_radii[section] and anomaly_radii[section].max or max_radius or 3) + 1) * 2)
+	local radius_sqr = radius * radius
+	return radius_sqr
+end
+
 -- Special behaviour is actor near an anomaly
 bind_anomaly_field_update = bind_anomaly_field.anomaly_field_binder.update
 bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
@@ -2393,17 +2424,10 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 
 	local section = self.section
 	if true or anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
+		
 		-- Get behaviour radius and check if actor inside it, then apply effect
-		-- Behaviour radius in priorities
-		--    1. anomalies_near_actor_radii[section] -- specially defined behaviour radius
-		--    2. anomaly_radii[section].max -- defined hit radius of anomaly
-		--    3. max_radius -- max hit radius defined in level config
-		--    4. 3 -- default radius
-		--    5. p.2,3,4 or 5 is then added 1 and multiplied by 2
-
 		local actor = db.actor
-		local radius = anomalies_near_actor_radii[section] or (((anomaly_radii[section] and anomaly_radii[section].max or max_radius or 3) + 1) * 2)
-		local radius_sqr = radius * radius
+		local radius_sqr = get_anomaly_behaviour_radius(section)
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr then
 			-- Open anomaly article

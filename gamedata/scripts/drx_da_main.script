@@ -2536,8 +2536,8 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 			self.on_update_timer = self.on_update_timer_default
 		else
 			detector_functions.detector_anomaly_remove_factor(detector_functions, self, actor, distance_to_sqr, radius_sqr, true)
-			-- self.on_update_timer = min(self.on_update_timer_max, self.on_update_timer_default * (1 + distance_to_sqr / radius_sqr * 0.5))
 			self.on_update_timer = clamp(self.on_update_timer_default * (distance_to_sqr / radius_sqr * 0.5), self.on_update_timer_default, self.on_update_timer_max)
+			-- _G.printf("%s, on_update_timer %s", self.object:name(), self.on_update_timer)
 		end
 
 		self.on_update_time = tg + self.on_update_timer

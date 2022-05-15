@@ -1752,6 +1752,25 @@ function build_anomalies_pos_tree()
 	detectable_anomalies_pos_tree = kd_tree.buildTreeSeObjectIds(t)
 end
 
+-- Rays
+local function ray_main(pos1, pos2, args)
+	local pos1 = vector():set(pos1.x or pos1[1], pos1.y or pos1[2], pos1.z or pos1[3])
+	local pos2 = vector():set(pos2.x or pos2[1], pos2.y or pos2[2], pos2.z or pos2[3])
+	local args = args or {}
+
+	local pick = ray_pick()
+	pick:set_position(pos1)
+	pick:set_direction(pos2:sub(pos1):normalize())
+	pick:set_flags(args.flags or 2)
+	pick:set_range(args.range or 200)
+	if args.ignore_object then
+		pick:set_ignore_object(args.ignore_object)
+	end
+	pick:query()
+
+	return pick
+end
+
 local anomalies_vars = {
 	-- Quick lookup of sine values by degrees
 	sin_lut = (function()
@@ -2003,6 +2022,41 @@ anomalies_near_actor_functions = {
 	zone_mine_electric = function(anomaly, actor, distance_to_sqr, radius_sqr, effector_modifier)
 		local hit_type_shock = HitTypeID["Shock"]
 		local hit_power = level_environment.is_actor_immune() and 0 or (1 - distance_to_sqr / radius_sqr) ^ 2 * settings.electric_field_modifier
+		local distance_to = distance_to_sqr ^ 0.5
+		local reduction_coeff = 1
+
+		local anom_pos = anomaly.object:position()
+		-- anom_pos = level_vertex_id(anom_pos)
+		-- anom_pos = level_vertex_position(anom_pos)
+		local anom_pos_adjusted = vector():set(anom_pos.x, anom_pos.y + 0.3, anom_pos.z)
+		local actor_pos = utils_obj.safe_bone_pos(actor, "bip01_spine")
+		-- local actor_pos = actor:position()
+		-- actor_pos = vector():set(actor_pos.x, actor_pos.y + 0.5, actor_pos.z)
+		local anom_to_actor_ray = ray_main(anom_pos_adjusted, actor_pos, {range = distance_to})
+		local actor_to_anom_ray = ray_main(actor_pos, anom_pos, {range = distance_to})
+
+		if anom_to_actor_ray and actor_to_anom_ray then
+			local anom_to_actor_distance = anom_to_actor_ray:get_distance()
+			local actor_to_anom_distance = actor_to_anom_ray:get_distance()
+
+			local obstacle_distance = 0
+
+			if anom_to_actor_distance > 0 then
+				obstacle_distance = distance_to - anom_to_actor_distance - actor_to_anom_distance
+				reduction_coeff = clamp((1 - obstacle_distance / (distance_to - actor_to_anom_distance)) ^ 3, 0, 1)
+			end
+
+			hit_power = hit_power * reduction_coeff
+
+			-- _G.printf("reduction coeff due to obstacle - %s", reduction_coeff)
+			-- _G.printf("anom_to_actor_distance - %s", anom_to_actor_distance)
+			-- _G.printf("actor_to_anom_distance - %s", actor_to_anom_distance)
+			-- _G.printf("obstacle_distance - %s", obstacle_distance)
+			-- _G.printf("combined distance - %s", anom_to_actor_distance + obstacle_distance + actor_to_anom_distance)
+			-- _G.printf("input distance - %s", distance_to)
+		end
+
+		hit_power = hit_power * reduction_coeff
 
 		if hit_power > 0 then
 			local hit_additional = 0
@@ -2079,7 +2133,7 @@ anomalies_near_actor_functions = {
 			end
 		end
 
-		anomalies_vars:add_factor(anomaly, actor, distance_to_sqr, radius_sqr, "zone_mine_electric", (1 - distance_to_sqr / radius_sqr) ^ 2)
+		anomalies_vars:add_factor(anomaly, actor, distance_to_sqr, radius_sqr, "zone_mine_electric", (1 - distance_to_sqr / radius_sqr) ^ 2 * reduction_coeff)
 		local mine_factor = clamp(anomalies_vars:find_factor_sum(anomaly, actor, distance_to_sqr, radius_sqr, anomalies_vars.zone_mine_electric_factor_function), 0, 1)
 
 		-- PPE effector
@@ -2520,7 +2574,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 	if not self.object then return end
 
 	local section = self.section
-	if true or anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
+	if anomalies_near_actor_functions[section] or (additional_articles_to_category.encyclopedia_anomalies[section] and not opened_articles.encyclopedia_anomalies[additional_articles_to_category.encyclopedia_anomalies[section]]) then
 		
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		local actor = db.actor

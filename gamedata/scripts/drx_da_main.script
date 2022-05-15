@@ -2620,7 +2620,7 @@ end
 
 process_flicker = item_device.device_binder.process_flicker
 item_device.device_binder.process_flicker = function(self, force)
-	process_flicker(self, pda_glitch_value and pda_glitch_value > 0.2 or force)
+	process_flicker(self, pda_glitch_value and pda_glitch_value > 0.3 or force)
 end
 
 process_torch = item_device.device_binder.process_torch

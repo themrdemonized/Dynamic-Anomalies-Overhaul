@@ -2043,10 +2043,8 @@ anomalies_near_actor_functions = {
 
 			if anom_to_actor_distance > 0 then
 				obstacle_distance = distance_to - anom_to_actor_distance - actor_to_anom_distance
-				reduction_coeff = clamp((1 - obstacle_distance / (distance_to - actor_to_anom_distance)) ^ 3, 0, 1)
+				reduction_coeff = clamp((1 - obstacle_distance / radius_sqr ^ 0.5) ^ 3.5, 0, 1)
 			end
-
-			hit_power = hit_power * reduction_coeff
 
 			-- _G.printf("reduction coeff due to obstacle - %s", reduction_coeff)
 			-- _G.printf("anom_to_actor_distance - %s", anom_to_actor_distance)
@@ -2495,7 +2493,6 @@ function notify_anomaly(anomaly, actor, distance_to_sqr, radius_sqr, custom_call
 	end
 end
 
-local on_update_timer = 100
 bind_anomaly_field_spawn = bind_anomaly_field.anomaly_field_binder.net_spawn
 bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	if not bind_anomaly_field_spawn(self, se_abstract) then
@@ -2515,13 +2512,17 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	end
 
 	-- Update callback similar to binder update, but works even if anomaly is disabled
-	self.on_update_time = time_global() + random(on_update_timer, on_update_timer * 10)
+	self.on_update_timer_default = 100
+	self.on_update_timer_max = 7500
+	self.on_update_timer = self.on_update_timer_default
+	self.on_update_time = time_global() + random(self.on_update_timer_default, self.on_update_timer_default * 10)
+
 	self.update_key = self.object:name() .. "_update"
 	self.radius_sqr = get_anomaly_behaviour_radius(section)
-	register_callback("actor_on_update", function()		
+
+	register_callback("actor_on_update", function()
 		local tg = time_global()
 		if tg < self.on_update_time then return end
-		self.on_update_time = tg + on_update_timer
 
 		-- Get behaviour radius and check if actor inside it, then apply effect
 		local actor = db.actor
@@ -2532,9 +2533,14 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 			if not anomaly_detector_ignore[section] then
 				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
 			end
+			self.on_update_timer = self.on_update_timer_default
 		else
 			detector_functions.detector_anomaly_remove_factor(detector_functions, self, actor, distance_to_sqr, radius_sqr, true)
+			-- self.on_update_timer = min(self.on_update_timer_max, self.on_update_timer_default * (1 + distance_to_sqr / radius_sqr * 0.5))
+			self.on_update_timer = clamp(self.on_update_timer_default * (distance_to_sqr / radius_sqr * 0.5), self.on_update_timer_default, self.on_update_timer_max)
 		end
+
+		self.on_update_time = tg + self.on_update_timer
 	end, nil, self.update_key)
 
 	return true

@@ -2559,6 +2559,8 @@ bind_anomaly_field.anomaly_field_binder.net_destroy = function(self)
 	local section = self.section
 
 	detectable_anomalies_ids[self.object:id()] = nil
+	anomalies_vars.remove_factor(anomalies_vars, self, actor, distance_to_sqr, radius_sqr)
+	detector_functions.detector_anomaly_remove_factor(detector_functions, self, actor, distance_to_sqr, radius_sqr, true)
 
 	if anomalies_destroy_functions[section] then
 		anomalies_destroy_functions[section](self)

@@ -2522,11 +2522,13 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 
 	local anom_zone_data = utils_stpk.get_anom_zone_data(alife_object(self.object:id()))
 	if anom_zone_data and anom_zone_data.shapes[1] and anom_zone_data.shapes[1].radius then
-		self.radius_sqr = ((anom_zone_data.shapes[1].radius + 1) * 2) ^ 2
+		self.radius_sqr = anomalies_near_actor_radii[section] or ((anom_zone_data.shapes[1].radius + 1) * 2)
+		self.radius_sqr = self.radius_sqr * self.radius_sqr
 		-- printf("getting anom radius from net packet, %s", self.radius_sqr)
 	else
 		self.radius_sqr = get_anomaly_behaviour_radius(section)
 	end
+	self.behaviour_radius_sqr = get_anomaly_behaviour_radius(section)
 
 	register_callback("actor_on_update", function()
 		local tg = time_global()
@@ -2537,6 +2539,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		local radius_sqr = self.radius_sqr
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr then
+
 			-- Beep near anoms even if disabled for anomaly_detector
 			if not anomaly_detector_ignore[self.section] then
 				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
@@ -2545,6 +2548,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		else
 			detector_functions.detector_anomaly_remove_factor(detector_functions, self, actor, distance_to_sqr, radius_sqr, true)
 			self.on_update_timer = clamp(self.on_update_timer_default * (distance_to_sqr / radius_sqr * 0.5), self.on_update_timer_default, self.on_update_timer_max)
+
 			-- _G.printf("%s, on_update_timer %s", self.object:name(), self.on_update_timer)
 		end
 

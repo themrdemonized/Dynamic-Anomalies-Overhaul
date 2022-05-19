@@ -2435,9 +2435,8 @@ detector_functions = {
 
 		local factor = 0
 		for k, v in pairs(self.detector_anomaly_factors) do
-			local f = anomalies_vars.factors[k] and anomalies_vars.factors[k].factor or v -- Check anomalies vars also for some special factors
-			if f > factor then
-				factor = f
+			if v > factor then
+				factor = v
 			end
 		end
 		return factor

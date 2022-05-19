@@ -1771,7 +1771,7 @@ local function ray_main(pos1, pos2, args)
 	return pick
 end
 
-local anomalies_vars = {
+anomalies_vars = {
 	-- Quick lookup of sine values by degrees
 	sin_lut = (function()
 		local t = {}
@@ -2435,8 +2435,9 @@ detector_functions = {
 
 		local factor = 0
 		for k, v in pairs(self.detector_anomaly_factors) do
-			if v > factor then
-				factor = v
+			local f = anomalies_vars.factors[k] and anomalies_vars.factors[k].factor or v -- Check anomalies vars also for some special factors
+			if f > factor then
+				factor = f
 			end
 		end
 		return factor
@@ -2518,7 +2519,14 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	self.on_update_time = time_global() + random(self.on_update_timer_default, self.on_update_timer_default * 10)
 
 	self.update_key = self.object:name() .. "_update"
-	self.radius_sqr = get_anomaly_behaviour_radius(section)
+
+	local anom_zone_data = utils_stpk.get_anom_zone_data(alife_object(self.object:id()))
+	if anom_zone_data and anom_zone_data.shapes[1] and anom_zone_data.shapes[1].radius then
+		self.radius_sqr = ((anom_zone_data.shapes[1].radius + 1) * 2) ^ 2
+		-- printf("getting anom radius from net packet, %s", self.radius_sqr)
+	else
+		self.radius_sqr = get_anomaly_behaviour_radius(section)
+	end
 
 	register_callback("actor_on_update", function()
 		local tg = time_global()
@@ -2530,7 +2538,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		local distance_to_sqr = self.object:position():distance_to_sqr(actor:position())
 		if distance_to_sqr <= radius_sqr then
 			-- Beep near anoms even if disabled for anomaly_detector
-			if not anomaly_detector_ignore[section] then
+			if not anomaly_detector_ignore[self.section] then
 				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
 			end
 			self.on_update_timer = self.on_update_timer_default

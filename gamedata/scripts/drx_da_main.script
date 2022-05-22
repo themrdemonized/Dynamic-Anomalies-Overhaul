@@ -2366,6 +2366,17 @@ anomaly_detector_ignore = {
 	zone_radioactive_weak = true,
 	zone_mine_field = true,
 	campfire = true,
+	campfire_base = true,
+	campfire_base_noshadow = true,
+	zone_base = true,
+	zone_base_noshadow = true,
+	zone_burning_fuzz = true,
+	zone_emi = true,
+	zone_liana = true,
+	zone_student = true,
+	zone_teleport = true,
+	zone_zhar = true,
+
 }
 
 function find_nearest_anomaly(force_enabled)

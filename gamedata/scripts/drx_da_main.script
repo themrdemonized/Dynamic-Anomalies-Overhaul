@@ -399,7 +399,7 @@ anomaly_radii = {
 	zone_mine_electric_average = {min = 2, max = 3},
 	zone_mine_electric_strong = {min = 2, max = 3},
 	zone_mine_flash = {min = 2, max = 3},
-	zone_mine_ghost = {min = 2, max = 2},
+	zone_mine_ghost = {min = 2, max = 3},
 	zone_mine_gold = {min = 2, max = 3},
 	zone_mine_gravitational_weak = {min = 2, max = 3},
 	zone_mine_gravitational_average = {min = 3, max = 4},
@@ -2248,7 +2248,6 @@ anomalies_near_actor_functions = {
 	end,
 
 }
-
 -- Special behaviour for anomalies after spawn
 anomalies_spawn_functions = {
 
@@ -2294,17 +2293,10 @@ anomalies_spawn_functions = {
 			local max_offset_y_low = spawn_position.y - max_offset_y
 			local max_offset_y_high = spawn_position.y + max_offset_y
 
-			local t = 0
-			local t_update = 20
-
 			local prev_pos_x = spawn_position.x
 			local prev_pos_y = spawn_position.y
 			local prev_pos_z = spawn_position.z
 			register_callback("actor_on_update", function()
-				local tg = time_global()
-				if tg < t then return end
-				t = tg + t_update
-
 				if i >= full_circle then
 					i = i % full_circle
 				end
@@ -2332,8 +2324,9 @@ anomalies_spawn_functions = {
 				prev_pos_y = offset_y
 				prev_pos_z = offset_z
 
-				i = i + i_step
-				j = j + j_step
+				local delta = min(50, device().time_delta) / 21 -- Frame independent movement, less than 20 fps will be slower due to prevent sudden pops
+				i = floor(i + i_step * delta)
+				j = floor(j + j_step * delta)
 			end, nil, key)
 		end
 	end,

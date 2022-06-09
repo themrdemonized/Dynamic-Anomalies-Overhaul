@@ -2570,7 +2570,19 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 
 			-- Beep near anoms even if disabled for anomaly_detector
 			if not anomaly_detector_ignore[self.section] then
-				notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
+				local og_dyn_anomalies = bind_anomaly_field.dyn_anomalies
+				if not og_dyn_anomalies then
+					notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
+				else
+					local level_name = level.name()
+					if og_dyn_anomalies[level_name] and og_dyn_anomalies[level_name][self.object:id()] ~= nil then
+						if og_dyn_anomalies[level_name][self.object:id()] then
+							notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
+						end
+					else
+						notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)
+					end
+				end
 			end
 			self.on_update_timer = self.on_update_timer_default
 		else

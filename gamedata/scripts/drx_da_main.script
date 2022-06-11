@@ -1585,7 +1585,7 @@ function drx_da_actor_on_update_callback()
 	get_actor_psy_table()
 	init_anomaly_table_global(level.name())
 
-	printf("saved level %s, current level %s", level.name(), alife_storage_manager.get_state().drx_da_previous_level)
+	printf("saved level %s, current level %s", alife_storage_manager.get_state().drx_da_previous_level, level.name())
 	if level.name() == alife_storage_manager.get_state().drx_da_previous_level then
 		printf("on the same level, only register behaviour")
 		if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
@@ -2895,6 +2895,10 @@ function load_state(m_data)
 	RegisterScriptCallback("actor_on_update", drx_da_actor_on_update_callback)
 end
 
+function actor_on_first_update()
+	load_state(alife_storage_manager.get_state())
+end
+
 function save_anomalies(m_data)
 	local t = {}
 	for key, effect in pairs(timed_effects) do
@@ -2952,7 +2956,8 @@ function on_game_start()
 	RegisterScriptCallback("on_before_level_changing", on_before_level_changing)
 	RegisterScriptCallback("save_state", save_anomalies)
 	RegisterScriptCallback("save_state", save_level)
-	RegisterScriptCallback("load_state", load_state)
+	-- RegisterScriptCallback("load_state", load_state)
+	RegisterScriptCallback("actor_on_first_update", actor_on_first_update)
 	RegisterScriptCallback("on_game_load", load_settings)
 	RegisterScriptCallback("on_option_change", on_option_change)
 end

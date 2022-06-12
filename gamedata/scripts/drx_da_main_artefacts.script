@@ -48,6 +48,30 @@ allowed_artefacts = (function() -- Allowed artefacts to spawn
 		t["marker"] = true
 		t["monolith_shard"] = true
 
+		-- Multiplayer items
+		t["mp_af_electra_flash"] = true
+		t["mp_zone_witches_galantine"] = true
+		t["mp_af_cta_green"] = true
+		t["mp_af_cta_blue"] = true
+		t["mp_medkit"] = true
+		t["mp_medkit_scientic"] = true
+		t["mp_medkit_army"] = true
+		t["mp_energy_drink"] = true
+		t["mp_bandage"] = true
+		t["mp_antirad"] = true
+		t["mp_drug_coagulant"] = true
+		t["mp_drug_radioprotector"] = true
+		t["mp_medkit_old"] = true
+		t["mp_antirad_old"] = true
+		t["mp_detector_advanced"] = true
+		t["mp_device_torch"] = true
+		t["mp_players_rukzak"] = true
+		t["mp_wood_stolb_fixed"] = true
+		t["mp_wood_stolb_fixed_immunities"] = true
+		t["mp_explosive_fuelcan"] = true
+		t["mp_explosive_tank"] = true
+		t["mp_explosive_barrel"] = true
+
 		-- Storylines Artefacts
 		t["af_ah_e1"] = true
 		t["af_ah_e2"] = true

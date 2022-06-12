@@ -2396,6 +2396,30 @@ anomaly_detector_ignore = {
 	zone_teleport = true,
 	zone_zhar = true,
 
+	-- MP items
+	mp_af_electra_flash = true,
+	mp_zone_witches_galantine = true,
+	mp_af_cta_green = true,
+	mp_af_cta_blue = true,
+	mp_medkit = true,
+	mp_medkit_scientic = true,
+	mp_medkit_army = true,
+	mp_energy_drink = true,
+	mp_bandage = true,
+	mp_antirad = true,
+	mp_drug_coagulant = true,
+	mp_drug_radioprotector = true,
+	mp_medkit_old = true,
+	mp_antirad_old = true,
+	mp_detector_advanced = true,
+	mp_device_torch = true,
+	mp_players_rukzak = true,
+	mp_wood_stolb_fixed = true,
+	mp_wood_stolb_fixed_immunities = true,
+	mp_explosive_fuelcan = true,
+	mp_explosive_tank = true,
+	mp_explosive_barrel = true,
+
 }
 
 function find_nearest_anomaly(force_enabled)

@@ -729,20 +729,41 @@ function remove_anomaly_obj(id, level_name)
 		printf("removing anomaly object %s, %s, on level %s", obj:section_name(), obj.id, level_name)
 		-- obj:disable_anomaly()
 
+		local db_tables = {
+			db.actor_inside_zones,
+			db.anim_obj_by_name,
+			db.anomaly_by_name,
+			db.bridge_by_name,
+			db.camp_storage,
+			db.campfire_by_name,
+			db.campfire_table_by_smart_names,
+			db.dynamic_ltx,
+			db.heli,
+			db.heli_enemies,
+			db.info_restr,
+			db.level_doors,
+			db.no_weap_zones,
+			db.offline_objects,
+			db.script_ids,
+			db.signal_light,
+			db.smart_terrain_by_id,
+			db.spawned_vertex_by_id,
+			db.storage,
+			db.story_by_id,
+			db.story_object,
+			db.used_level_vertex_ids,
+			db.zone_by_name,
+		}
 
-		local g_obj = level.object_by_id(id)
-		if g_obj and g_obj ~= 0 and g_obj:id() ~= 0 then
-			db.del_zone(g_obj)
-			db.del_obj(g_obj)
-			db.del_anomaly({object = g_obj})
-			db.storage[g_obj:id()] = nil
-			bind_anomaly_field.fields_by_names[g_obj:name()] = nil
-
-			g_obj:destroy_object()
-		else
-			alife_record(obj, false)
-			alife():release(obj, false)
+		for i = 1, #db_tables do
+			if is_not_empty(db_tables[i]) then
+				db_tables[i][obj.id] = nil
+				db_tables[i][obj:name()] = nil
+			end
 		end
+		bind_anomaly_field.fields_by_names[obj:name()] = nil
+
+		safe_release_manager.release(obj)
 	end
 end
 
@@ -861,8 +882,7 @@ function clean_dynamic_anomalies_global()
 					if se_obj then
 						if IsAnomaly(_, se_obj:clsid()) then
 							printf("Deleting anomaly %s, %s globally, level %s", se_obj:section_name(), v1, k)
-							alife_record(se_obj, false)
-							sim_release(sim, se_obj, false)
+							safe_release_manager.release(se_obj)
 						else
 							printf("Error, object is not an anomaly, %s, %s, on level %s", se_obj:section_name(), v1, k)
 						end
@@ -896,7 +916,8 @@ function clean_dynamic_anomalies_global()
 							local anom_id = load_var(db.actor, strformat("drx_da_anom_id_%s_%s", smart_name, j), nil)
 							if anom_id then
 								if not in_restrictions[anom_id] then
-									alife_release_id(anom_id)
+									local o = alife_object(anom_id)
+									if o then safe_release_manager.release(o) end
 								else
 									printf("Error, can't remove old anomaly %s, level %s, in restriction", anom_id, k)
 									fully_cleaned = false
@@ -912,6 +933,12 @@ function clean_dynamic_anomalies_global()
 		end
 	end
 	printf("Cleaned dynamic anomalies globally")
+	if settings.save_after_cleanup then
+		CreateTimeEvent("drx_da_save_after_cleanup", 0, 0.25, function()
+			exec_console_cmd("save " .. (user_name() or "") .. " - DAO tempsave")
+			return true
+		end)
+	end
 end
 
 function drx_da_spawn_anomaly_on_smart(level_file, smart_name, anomaly_type, level_name, position_data)
@@ -1157,7 +1184,7 @@ function drx_da_spawn_anomaly(anom_type, pos, lvid, gvid, level_file)
 			local obj = alife():object(se_obj_id)
 			if obj then
 				printf("Error, anomaly %s failed to spawn correctly, releasing", anom_type)
-				alife():release(obj)
+				safe_release_manager.release(obj)
 			end
 			return true
 		end)
@@ -1365,7 +1392,8 @@ function clean_artefacts_on_level(level_name)
 	local artefacts = updated_anomaly_levels[level_name].artefacts
 	if is_not_empty(artefacts) then
 		for k, v in pairs(artefacts) do
-			alife_release_id(k)
+			local o = alife_object(k)
+			if o then safe_release_manager.release(o) end
 			printf("releasing artefact %s, sec %s, level_name %s", k, v, level_name)
 			artefacts[k] = nil
 		end
@@ -2856,7 +2884,7 @@ anomalies_monster_hit_functions = {
 		printf("flash got hit %s", monster:section())
 		s_hit.power = 0
 		flags.ret_value = false
-		alife():release(alife():object(monster:id()))
+		safe_release_manager.release(alife_object(monster:id()))
 	end,
 
 	-- Reduce power for Rebounder

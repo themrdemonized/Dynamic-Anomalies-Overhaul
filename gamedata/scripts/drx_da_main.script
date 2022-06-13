@@ -690,6 +690,7 @@ function disable_anomaly_obj(id, level_name)
 			g_obj:disable_anomaly()
 		end
 	end
+	utils_obj.switch_offline(id)
 end
 
 function disable_anomalies_on_level(level_name)

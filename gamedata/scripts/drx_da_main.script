@@ -934,7 +934,7 @@ function clean_dynamic_anomalies_global()
 	end
 	printf("Cleaned dynamic anomalies globally")
 	if settings.save_after_cleanup then
-		CreateTimeEvent("drx_da_save_after_cleanup", 0, 0.25, function()
+		CreateTimeEvent("drx_da_save_after_cleanup", 0, 0.1, function()
 			exec_console_cmd("save " .. (user_name() or "") .. " - DAO tempsave")
 			return true
 		end)

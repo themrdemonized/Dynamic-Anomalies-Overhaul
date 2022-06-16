@@ -88,7 +88,7 @@ op = {
         {id = "gravitational_shake_modifier", type = "track", val = 2, min = 0, max = 2, step = 0.1, def = 1},
         {id = "electric_field_modifier", type = "track", val = 2, min = 0, max = 3, step = 0.1, def = 1},
         {id = "enable_anomalies_behaviour", type = "check", val = 1, def = true},
-        {id = "save_after_cleanup", type = "check", val = 1, def = true},
+        {id = "save_after_cleanup", type = "check", val = 1, def = false},
         {id = "disable_new_anomalies", type = "check", val = 1, def = false},
 
         {id = "divider", type = "line"},

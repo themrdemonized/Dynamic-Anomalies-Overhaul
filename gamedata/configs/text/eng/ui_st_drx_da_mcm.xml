@@ -95,6 +95,13 @@
 		<text>Defines if dynamic anomalies have special behaviour and can pop in and out of existence in zone</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_save_after_cleanup">
+		<text>Save Game After Anomalies Removal</text>
+	</string>
+	<string id="ui_mcm_drx_da_save_after_cleanup_desc">
+		<text>Saves the game after emission or psi-storm when dynamic anomalies are removed from the level</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_disable_new_anomalies">
 		<text>Disable New Anomalies</text>
 	</string>

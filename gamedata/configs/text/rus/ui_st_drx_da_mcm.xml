@@ -95,6 +95,13 @@
 		<text>Определяет, имеют ли динамические аномалии особое поведение, а именно могут ли они появляться и исчезать в аномальной зоне.</text>
 	</string>
 
+	<string id="ui_mcm_drx_da_save_after_cleanup">
+		<text>Сохранить игру после удаления аномалий</text>
+	</string>
+	<string id="ui_mcm_drx_da_save_after_cleanup_desc">
+		<text>Сохраняет игру после выброса или пси-шторма после удаления аномалий</text>
+	</string>
+
 	<string id="ui_mcm_drx_da_disable_new_anomalies">
 		<text>Отключить новые аномалии</text>
 	</string>

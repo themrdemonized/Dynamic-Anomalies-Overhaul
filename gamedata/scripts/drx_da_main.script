@@ -1590,7 +1590,7 @@ function drx_da_update_dynamic_anomalies(force)
 	if last_surge_time > updated_anomaly_levels[level_name].time or force then
 		clean_dynamic_anomalies_on_level(level_name)
 		clean_artefacts_on_level(level_name)
-		CreateTimeEvent("drx_da_spawn_anomalies_on_level", "drx_da_spawn_anomalies_on_level", 0.6, function()
+		CreateTimeEvent("drx_da_spawn_anomalies_on_level", "drx_da_spawn_anomalies_on_level", 0.3, function()
 			local anomalies = drx_da_spawn_anomalies_on_level(level_name)
 			if not anomalies then
 				printf("Error, failed to spawn anomalies")
@@ -3025,10 +3025,12 @@ local function on_option_change()
 	end
 
 	unregister_anomalies_behaviour()
-	if settings.enable_anomalies_behaviour then
-		register_anomalies_behaviour()
-	else
-		enable_anomalies_on_level()
+	if updated_anomaly_levels[level.name()] and not updated_anomaly_levels[level.name()].disabled then
+		if settings.enable_anomalies_behaviour then
+			register_anomalies_behaviour()
+		else
+			enable_anomalies_on_level()
+		end
 	end
 end
 

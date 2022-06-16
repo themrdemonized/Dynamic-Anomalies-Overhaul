@@ -591,10 +591,8 @@ function remove_all_restrictions(level_name)
 								for k1, v1 in pairs(monster_data[k]) do
 									if anomalies_ids[se_obj_level][v1] then
 										printf("removed restriction %s for level %s", se_obj:name(), se_obj_level)
-										if IsMonster(_, cls) then
-											sim_remove_in_restriction(sim, se_obj, v1)
-											sim_remove_out_restriction(sim, se_obj, v1)
-										end
+										sim_remove_in_restriction(sim, se_obj, v1)
+										sim_remove_out_restriction(sim, se_obj, v1)
 									end
 								end
 							end

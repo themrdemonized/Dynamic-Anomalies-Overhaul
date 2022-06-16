@@ -433,6 +433,7 @@ function init_anomaly_table_on_level(level_name)
 	if not updated_anomaly_levels[level_name].available_smarts_reduced then updated_anomaly_levels[level_name].available_smarts_reduced = {} end
 	if not updated_anomaly_levels[level_name].artefacts then updated_anomaly_levels[level_name].artefacts = {} end
 	if not updated_anomaly_levels[level_name].time then updated_anomaly_levels[level_name].time = -1 end
+	if not updated_anomaly_levels[level_name].disabled then updated_anomaly_levels[level_name].disabled = false end
 end
 
 function init_anomaly_table_global(current_level)
@@ -590,17 +591,10 @@ function remove_all_restrictions(level_name)
 								for k1, v1 in pairs(monster_data[k]) do
 									if anomalies_ids[se_obj_level][v1] then
 										printf("removed restriction %s for level %s", se_obj:name(), se_obj_level)
-										
 										if IsMonster(_, cls) then
 											sim_remove_in_restriction(sim, se_obj, v1)
 											sim_remove_out_restriction(sim, se_obj, v1)
 										end
-
-										-- local obj = level.object_by_id(se_obj.id)
-										-- if obj and IsStalker(_, cls) then
-										-- 	local out_restr = parse_names(obj:out_restrictions())
-										-- 	print_r(out_restr)
-										-- end
 									end
 								end
 							end
@@ -699,7 +693,6 @@ function disable_anomaly_obj(id, level_name)
 			g_obj:disable_anomaly()
 		end
 	end
-	utils_obj.switch_offline(id)
 end
 
 function disable_anomalies_on_level(level_name)
@@ -772,7 +765,13 @@ function remove_anomaly_obj(id, level_name)
 		end
 		bind_anomaly_field.fields_by_names[obj:name()] = nil
 
-		safe_release_manager.release(obj)
+		local g_obj = level.object_by_id(id)
+		if g_obj and g_obj ~= 0 and g_obj:id() ~= 0 then
+			g_obj:destroy_object()
+		else
+			alife_record(obj, false)
+			alife():release(obj, true)
+		end
 	end
 end
 
@@ -883,7 +882,8 @@ function clean_dynamic_anomalies_global()
 		clean_artefacts_on_level(k)
 		if k == level_name then
 			disable_anomalies_on_level(level_name)
-			clean_dynamic_anomalies_on_level_func(level_name)
+			v.disabled = true
+			-- clean_dynamic_anomalies_on_level_func(level_name)
 		else
 			for k1, v1 in pairs(v.anomalies) do
 				if not in_restrictions[v1] then
@@ -891,7 +891,8 @@ function clean_dynamic_anomalies_global()
 					if se_obj then
 						if IsAnomaly(_, se_obj:clsid()) then
 							printf("Deleting anomaly %s, %s globally, level %s", se_obj:section_name(), v1, k)
-							safe_release_manager.release(se_obj)
+							alife_record(se_obj ,false)
+							alife():release(se_obj, true)
 						else
 							printf("Error, object is not an anomaly, %s, %s, on level %s", se_obj:section_name(), v1, k)
 						end
@@ -926,7 +927,10 @@ function clean_dynamic_anomalies_global()
 							if anom_id then
 								if not in_restrictions[anom_id] then
 									local o = alife_object(anom_id)
-									if o then safe_release_manager.release(o) end
+									if o then 
+										alife_record(o ,false)
+										alife():release(o, true)
+									end
 								else
 									printf("Error, can't remove old anomaly %s, level %s, in restriction", anom_id, k)
 									fully_cleaned = false
@@ -1193,7 +1197,8 @@ function drx_da_spawn_anomaly(anom_type, pos, lvid, gvid, level_file)
 			local obj = alife():object(se_obj_id)
 			if obj then
 				printf("Error, anomaly %s failed to spawn correctly, releasing", anom_type)
-				safe_release_manager.release(obj)
+				alife_record(obj ,false)
+				alife():release(obj, true)
 			end
 			return true
 		end)
@@ -1597,6 +1602,7 @@ function drx_da_update_dynamic_anomalies(force)
 
 			printf("updated anomalies on level %s", level_name)
 			updated_anomaly_levels[level_name].time = last_surge_time
+			updated_anomaly_levels[level_name].disabled = false
 			build_anomalies_pos_tree()
 			if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
 			spawn_artefacts_on_level(level_name)
@@ -1625,12 +1631,28 @@ function drx_da_actor_on_update_callback()
 
 	printf("saved level %s, current level %s", alife_storage_manager.get_state().drx_da_previous_level, level.name())
 	if level.name() == alife_storage_manager.get_state().drx_da_previous_level then
+		local level_name = level.name()
+		if updated_anomaly_levels[level_name].disabled then
+			if last_surge_time > updated_anomaly_levels[level_name].time then
+				clean_dynamic_anomalies_on_level(level_name)
+				updated_anomaly_levels[level_name].disabled = false
+			end
+		end
+
 		printf("on the same level, only register behaviour")
 		if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
 		unregister_drx_da()
 		build_anomalies_pos_tree()
 		RegisterScriptCallback("actor_on_update", actor_on_update)
 		return
+	else
+		local level_name = alife_storage_manager.get_state().drx_da_previous_level
+		if updated_anomaly_levels[level_name].disabled then
+			if last_surge_time > updated_anomaly_levels[level_name].time then
+				clean_dynamic_anomalies_on_level(level_name)
+				updated_anomaly_levels[level_name].disabled = false
+			end
+		end
 	end
 
 	get_anomalies_by_smart(level.name())
@@ -2620,6 +2642,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		self.radius_sqr = get_anomaly_behaviour_radius(section)
 	end
 	self.behaviour_radius_sqr = get_anomaly_behaviour_radius(section)
+	local level_name = level.name()
 
 	register_callback("actor_on_update", function()
 		local tg = time_global()
@@ -2632,7 +2655,10 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		if distance_to_sqr <= radius_sqr then
 
 			-- Beep near anoms even if disabled for anomaly_detector
-			if not anomaly_detector_ignore[self.section] then
+			if not 	(
+				anomaly_detector_ignore[self.section]
+			or	(updated_anomaly_levels[level_name].disabled and updated_anomaly_levels[level_name].anomalies_properties[self.object:id()])
+			) then
 				local og_dyn_anomalies = bind_anomaly_field.dyn_anomalies
 				if not og_dyn_anomalies then
 					notify_anomaly(self, actor, distance_to_sqr, radius_sqr, true)

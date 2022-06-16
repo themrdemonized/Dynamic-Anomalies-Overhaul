@@ -1630,7 +1630,7 @@ function drx_da_actor_on_update_callback()
 	printf("saved level %s, current level %s", alife_storage_manager.get_state().drx_da_previous_level, level.name())
 	if level.name() == alife_storage_manager.get_state().drx_da_previous_level then
 		local level_name = level.name()
-		if updated_anomaly_levels[level_name].disabled then
+		if level_name and updated_anomaly_levels[level_name] and updated_anomaly_levels[level_name].disabled then
 			if last_surge_time > updated_anomaly_levels[level_name].time then
 				clean_dynamic_anomalies_on_level(level_name)
 				updated_anomaly_levels[level_name].disabled = false
@@ -1645,7 +1645,7 @@ function drx_da_actor_on_update_callback()
 		return
 	else
 		local level_name = alife_storage_manager.get_state().drx_da_previous_level
-		if updated_anomaly_levels[level_name].disabled then
+		if level_name and updated_anomaly_levels[level_name] and updated_anomaly_levels[level_name].disabled then
 			if last_surge_time > updated_anomaly_levels[level_name].time then
 				clean_dynamic_anomalies_on_level(level_name)
 				updated_anomaly_levels[level_name].disabled = false

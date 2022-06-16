@@ -589,9 +589,18 @@ function remove_all_restrictions(level_name)
 							if monster_data[k] and type(monster_data[k]) == "table" then
 								for k1, v1 in pairs(monster_data[k]) do
 									if anomalies_ids[se_obj_level][v1] then
-										printf("removed restriction %s for level %s", v1, se_obj_level)
-										sim_remove_in_restriction(sim, se_obj, v1)
-										sim_remove_out_restriction(sim, se_obj, v1)
+										printf("removed restriction %s for level %s", se_obj:name(), se_obj_level)
+										
+										if IsMonster(_, cls) then
+											sim_remove_in_restriction(sim, se_obj, v1)
+											sim_remove_out_restriction(sim, se_obj, v1)
+										end
+
+										-- local obj = level.object_by_id(se_obj.id)
+										-- if obj and IsStalker(_, cls) then
+										-- 	local out_restr = parse_names(obj:out_restrictions())
+										-- 	print_r(out_restr)
+										-- end
 									end
 								end
 							end

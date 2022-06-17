@@ -423,6 +423,7 @@ updated_anomaly_levels = {}
 last_surge_time = 0
 
 function init_anomaly_table_on_level(level_name)
+	local level_name = level_name or level.name()
 	if not updated_anomaly_levels[level_name] then updated_anomaly_levels[level_name] = {} end
 	if not updated_anomaly_levels[level_name].cleaned_old_anomalies then updated_anomaly_levels[level_name].cleaned_old_anomalies = false end
 	if not updated_anomaly_levels[level_name].anomalies then updated_anomaly_levels[level_name].anomalies = {} end
@@ -2653,9 +2654,15 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 		if distance_to_sqr <= radius_sqr then
 
 			-- Beep near anoms even if disabled for anomaly_detector
-			if not 	(
+			if not (
 				anomaly_detector_ignore[self.section]
-			or	(updated_anomaly_levels[level_name].disabled and updated_anomaly_levels[level_name].anomalies_properties[self.object:id()])
+			or	(
+				level_name 
+				and updated_anomaly_levels[level_name]
+				and updated_anomaly_levels[level_name].disabled
+				and updated_anomaly_levels[level_name].anomalies_properties
+				and updated_anomaly_levels[level_name].anomalies_properties[self.object:id()]
+				)
 			) then
 				local og_dyn_anomalies = bind_anomaly_field.dyn_anomalies
 				if not og_dyn_anomalies then

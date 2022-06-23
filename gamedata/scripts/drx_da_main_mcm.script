@@ -61,6 +61,18 @@ presets = {
         electric_field_modifier             = 1.5,
         enable_anomalies_behaviour          = "true", -- Pass as string, thats important
     },
+    [3] = {
+        anomaly_zone_spawn_chance           = 1,
+        anomaly_zone_anomalies_distance_max = 60,
+        anomaly_zone_anomalies_distance_min = 0.2,
+        anomaly_amount_modifier             = 2.5,
+        max_artefacts_per_zone              = 2,
+        artefacts_spawn_chance              = 25,
+        random_artefact_spawn_chance        = 50,
+        gravitational_shake_modifier        = 1,
+        electric_field_modifier             = 1.5,
+        enable_anomalies_behaviour          = "true", -- Pass as string, thats important
+    },
 }
 
 op_id = "drx_da"
@@ -74,6 +86,7 @@ op = {
             {0, "drx_da_preset_easy"},
             {1, "drx_da_preset_normal"},
             {2, "drx_da_preset_hard"},
+            {3, "drx_da_preset_fate_of_zone"},
         }},
 
         {id = "anomaly_zone_spawn_chance", type = "track", val = 2, min = 0, max = 1, step = 0.1, def = 1},
@@ -160,7 +173,7 @@ function set_preset(self, p)
                 if v.val == 0 then
                     -- Pass input value as is
                 elseif v.val == 1 then
-                    value = (value == "true") and true or false
+                    value = value == "true"
                 elseif v.val == 2 then
                     value = clamp(tonumber(value), v.min or 0, v.max or 100)
                 end

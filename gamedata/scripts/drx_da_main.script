@@ -2384,7 +2384,7 @@ anomalies_spawn_functions = {
 				prev_pos_y = offset_y
 				prev_pos_z = offset_z
 
-				local delta = min(50, device().time_delta) / 21 -- Frame independent movement, less than 20 fps will be slower due to prevent sudden pops
+				local delta = min(50, device().time_delta) / 22 -- Frame independent movement, less than 20 fps will be slower due to prevent sudden pops
 				i = floor(i + i_step * delta)
 				j = floor(j + j_step * delta)
 			end, nil, key)

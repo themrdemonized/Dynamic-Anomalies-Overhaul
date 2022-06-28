@@ -1098,6 +1098,18 @@ function drx_da_spawn_anomalies_on_level(level_name)
 		anomaly_list = t
 	end
 
+	-- Combine radiation fields to one type
+	-- local rad_fields = {}
+	-- for i = #anomaly_list, 1, -1 do
+	-- 	if anomalies_radiation_fields[anomaly_list[i]] then
+	-- 		rad_fields[#rad_fields + 1] = anomaly_list[i]
+	-- 		table_remove(anomaly_list, i)
+	-- 	end
+	-- end
+	-- if is_not_empty(rad_fields) then
+	-- 	anomaly_list[#anomaly_list + 1] = "zone_radiation_field"
+	-- end
+
 	-- Build anomalies table
 	if is_not_empty(smart_list) then
 		local anomalies = updated_anomaly_levels[level_name].anomalies or {}
@@ -1112,6 +1124,11 @@ function drx_da_spawn_anomalies_on_level(level_name)
 				-- Choose an anomaly type to spawn:
 				if anomaly_list and #anomaly_list >= 1 then
 					local anomaly_type = anomaly_list[random(#anomaly_list)]
+
+					-- if anomaly_type == "zone_radiation_field" then
+					-- 	anomaly_type = rad_fields[math.random(#rad_fields)]
+					-- end
+					
 					printf("picked anomaly type %s", anomaly_type)
 
 					if not anomalies_by_smart[smart_name] then anomalies_by_smart[smart_name] = {} end
@@ -1279,6 +1296,26 @@ small_levels = {
 
 -- Table of anomalies to ignore distance check
 anomalies_distance_check_ignore = {
+	zone_field_radioactive = true,
+	zone_field_radioactive_above_average = true,
+	zone_field_radioactive_average = true,
+	zone_field_radioactive_below_average = true,
+	zone_field_radioactive_lethal = true,
+	zone_field_radioactive_strong = true,
+	zone_field_radioactive_very_weak = true,
+	zone_field_radioactive_weak = true,
+	zone_radioactive = true,
+	zone_radioactive_above_average = true,
+	zone_radioactive_average = true,
+	zone_radioactive_below_average = true,
+	zone_radioactive_lethal = true,
+	zone_radioactive_strong = true,
+	zone_radioactive_very_weak = true,
+	zone_radioactive_weak = true,
+}
+
+-- Table of radiation fields
+anomalies_radiation_fields = {
 	zone_field_radioactive = true,
 	zone_field_radioactive_above_average = true,
 	zone_field_radioactive_average = true,

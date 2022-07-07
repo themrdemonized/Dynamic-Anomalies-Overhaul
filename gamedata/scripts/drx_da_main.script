@@ -171,7 +171,7 @@ local function look_at_position(pos, actor)
 end
 
 local get_safe_sound_object = xr_sound.get_safe_sound_object
-local function play_sound_on_actor(snd, volume, frequency)
+local function play_sound_on_actor(snd, volume, frequency, obj)
 	if not snd then
 		printf("snd is nil")
 		return
@@ -179,7 +179,11 @@ local function play_sound_on_actor(snd, volume, frequency)
 	local actor = db.actor
 	local snd = get_safe_sound_object(snd)
 	if snd then
-		snd:play(actor, 0, sound_object.s2d)
+		if obj and obj:id() ~= AC_ID then
+			snd:play_at_pos(obj, obj:position(), 0, sound_object.s3d)
+		else
+			snd:play(actor, 0, sound_object.s2d)
+		end
 		snd.volume = volume or 1
 		snd.frequency = frequency or 1
 		return snd
@@ -1640,13 +1644,13 @@ function drx_da_update_dynamic_anomalies(force)
 			updated_anomaly_levels[level_name].time = last_surge_time
 			updated_anomaly_levels[level_name].disabled = false
 			build_anomalies_pos_tree()
-			if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
+			if settings.enable_anomalies_behaviour or level_weathers.bLevelUnderground then register_anomalies_behaviour() end
 			spawn_artefacts_on_level(level_name)
 			return true
 		end)
 	else
 		printf("anomalies not updated on level %s, no emission happened, last_surge_time %s, level update time %s", level_name, last_surge_time, updated_anomaly_levels[level_name].time)
-		if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
+		if settings.enable_anomalies_behaviour or level_weathers.bLevelUnderground then register_anomalies_behaviour() end
 	end
 
 	return true
@@ -1676,7 +1680,7 @@ function drx_da_actor_on_update_callback()
 		end
 
 		printf("on the same level, only register behaviour")
-		if settings.enable_anomalies_behaviour then register_anomalies_behaviour() end
+		if settings.enable_anomalies_behaviour or level_weathers.bLevelUnderground then register_anomalies_behaviour() end
 		unregister_drx_da()
 		build_anomalies_pos_tree()
 		RegisterScriptCallback("actor_on_update", actor_on_update)
@@ -2046,11 +2050,15 @@ anomalies_near_actor_functions = {
 				if s_hit.type == hit.fire_wound then
 					s_hit.power = s_hit.power * random_float(0, 0.5)
 					play_sound_on_actor("eugenium_anomaly\\sphere\\sphere_blowout", 0.9, random_float(0.95, 1.05))
+					local gibs = particles_object("artefact\\artefact_gravi")
+					if gibs and not gibs:playing() then
+						gibs:play_at_pos(actor:position())
+					end
 				end
 			end, nil, key)
 		end
 
-		add_simple_timed_effect(1.5, nil, function()
+		add_simple_timed_effect(1, nil, function()
 			unregister_callback(key)
 		end, key, 1)
 	end,
@@ -2677,6 +2685,7 @@ bind_anomaly_field.anomaly_field_binder.net_spawn = function(self, se_abstract)
 	else
 		self.radius_sqr = get_anomaly_behaviour_radius(section)
 	end
+	self.radius = sqrt(self.radius_sqr)
 	self.behaviour_radius_sqr = get_anomaly_behaviour_radius(section)
 	local level_name = level.name()
 
@@ -2789,6 +2798,20 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 		else
 			anomalies_vars.remove_factor(anomalies_vars, self, actor, distance_to_sqr, radius_sqr)
 		end
+	end
+	if npc_on_near_anomalies_functions[section] then
+		if not self.iterate_nearest_func then
+			self.iterate_nearest_func = function(obj)
+				if obj 
+				and (IsStalker(obj) or IsMonster(obj))
+				and (obj.alive and obj:alive())
+				and obj:id() ~= AC_ID
+				then
+					npc_on_near_anomalies_functions[section](self, obj, db.actor)
+				end
+			end
+		end
+		level.iterate_nearest(self.object:position(), self.radius, self.iterate_nearest_func)
 	end
 end
 
@@ -2979,6 +3002,29 @@ anomalies_monster_hit_functions = {
 
 }
 
+-- Also used for monsters, filter for npcs or monsters specifically in functions bodies
+npc_on_near_anomalies_functions = {
+	zone_mine_sphere = function(anomaly, npc, actor)
+		local key = "zone_mine_sphere_" .. npc:name()
+		if not callbacks[key] then
+			register_callback("npc_on_before_hit", function(npc, s_hit, bone_id, flags)
+				if s_hit.type == hit.fire_wound then
+					s_hit.power = s_hit.power * random_float(0, 0.5)
+					play_sound_on_actor("eugenium_anomaly\\sphere\\sphere_blowout", 1, random_float(0.95, 1.05), anomaly.object)
+					local gibs = particles_object("artefact\\artefact_gravi")
+					if gibs and not gibs:playing() then
+						gibs:play_at_pos(npc:position())
+					end
+				end
+			end, nil, key)
+		end
+
+		add_simple_timed_effect(0.7, nil, function()
+			unregister_callback(key)
+		end, key, 1)
+	end
+}
+
 function actor_on_before_hit(s_hit, bone_id, flags)
 	if not s_hit.draftsman then return end
 
@@ -3070,7 +3116,7 @@ local function on_option_change()
 
 	unregister_anomalies_behaviour()
 	if updated_anomaly_levels[level.name()] and not updated_anomaly_levels[level.name()].disabled then
-		if settings.enable_anomalies_behaviour then
+		if settings.enable_anomalies_behaviour or level_weathers.bLevelUnderground then
 			register_anomalies_behaviour()
 		else
 			enable_anomalies_on_level()

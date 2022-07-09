@@ -3004,16 +3004,18 @@ anomalies_monster_hit_functions = {
 
 -- Also used for monsters, filter for npcs or monsters specifically in functions bodies
 npc_on_near_anomalies_functions = {
+
+	-- Rebounder effect for NPCs
 	zone_mine_sphere = function(anomaly, npc, actor)
 		local key = "zone_mine_sphere_" .. npc:name()
 		if not callbacks[key] then
-			register_callback("npc_on_before_hit", function(npc, s_hit, bone_id, flags)
-				if s_hit.type == hit.fire_wound then
+			register_callback(IsStalker(npc) and "npc_on_before_hit" or "monster_on_before_hit", function(npc_hit, s_hit, bone_id, flags)
+				if s_hit.type == hit.fire_wound and npc_hit:name() == npc:name() then
 					s_hit.power = s_hit.power * random_float(0, 0.5)
 					play_sound_on_actor("eugenium_anomaly\\sphere\\sphere_blowout", 1, random_float(0.95, 1.05), anomaly.object)
 					local gibs = particles_object("artefact\\artefact_gravi")
 					if gibs and not gibs:playing() then
-						gibs:play_at_pos(npc:position())
+						gibs:play_at_pos(npc_hit:position())
 					end
 				end
 			end, nil, key)
@@ -3022,7 +3024,8 @@ npc_on_near_anomalies_functions = {
 		add_simple_timed_effect(0.7, nil, function()
 			unregister_callback(key)
 		end, key, 1)
-	end
+	end,
+
 }
 
 function actor_on_before_hit(s_hit, bone_id, flags)

@@ -2806,6 +2806,7 @@ bind_anomaly_field.anomaly_field_binder.update = function(self, delta)
 				and (IsStalker(obj) or IsMonster(obj))
 				and (obj.alive and obj:alive())
 				and obj:id() ~= AC_ID
+				and obj:position():distance_to_sqr(self.object:position()) <= self.radius_sqr
 				then
 					npc_on_near_anomalies_functions[section](self, obj, db.actor)
 				end

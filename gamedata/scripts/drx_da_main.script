@@ -1964,7 +1964,7 @@ anomalies_vars = {
 anomalies_near_actor_radii = {
 	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4,
 	zone_mine_gold = anomaly_radii.zone_mine_gold.max * 3,
-	zone_mine_sphere = anomaly_radii.zone_mine_sphere.max * 3,
+	zone_mine_sphere = anomaly_radii.zone_mine_sphere.max * 2,
 	zone_mine_ghost = anomaly_radii.zone_mine_ghost.max * 5,
 }
 

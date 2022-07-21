@@ -1771,7 +1771,7 @@ function register_anomalies_behaviour()
 				obj:enable_anomaly()
 			end
 		end
-	end)
+	end, nil, 5)
 end
 
 anomalies_pos_tree = nil

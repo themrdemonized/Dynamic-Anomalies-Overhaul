@@ -111,6 +111,17 @@ local try = try or function(func, ...)
 	end
 end
 
+-- Shuffle table, Fisher-Yates shuffle with preserving original table
+local function shuffle(t)
+   local s = {}
+   for i = 1, #t do s[i] = t[i] end
+   for i = #t, 2, -1 do
+     local j = math.random(i)
+     s[i], s[j] = s[j], s[i]
+   end
+   return s
+end
+
 -- Get time elapsed from the start of the game in IRL seconds
 local time_factor = 6
 local function get_time_elapsed()
@@ -1521,7 +1532,7 @@ function spawn_artefacts_on_level(level_name)
 	local allowed_artefacts = drx_da_main_artefacts.allowed_artefacts
 	local allowed_artefacts_flipped = invert_table(allowed_artefacts)
 	local anomaly_type_to_artefacts = drx_da_main_artefacts.anomaly_type_to_artefacts
-	local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name]
+	local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name] and shuffle(dup_table(drx_da_main_artefacts.artefacts_map_tiers[level_name]))
 	local artefacts_map_chances = drx_da_main_artefacts.artefacts_map_chances and drx_da_main_artefacts.artefacts_map_chances[level_name]
 
 	-- Build anomalies table
@@ -1962,7 +1973,7 @@ anomalies_vars = {
 
 -- Defined radius of anomalies behaviour
 anomalies_near_actor_radii = {
-	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 4,
+	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 3.5,
 	zone_mine_gold = anomaly_radii.zone_mine_gold.max * 3,
 	zone_mine_sphere = anomaly_radii.zone_mine_sphere.max * 2,
 	zone_mine_ghost = anomaly_radii.zone_mine_ghost.max * 5,
@@ -1976,9 +1987,8 @@ anomalies_near_actor_functions = {
 		if not anomaly.spawn_time then anomaly.spawn_time = 0 end
 		if time_elapsed < anomaly.spawn_time then return end
 
-		local spawn_chance = 5
-		local spawn_cooldown = 180
-		local spawn_max_amount = 3
+		local spawn_cooldown = 300
+		local spawn_max_amount = 2
 		local spawn_table = {
 			"m_poltergeist_normal_tele",
 			"m_poltergeist_normal_flame",
@@ -1986,7 +1996,7 @@ anomalies_near_actor_functions = {
 
 		printf("trying to spawn poltergeist")
 
-		if random() * 100 <= 1 then
+		if random() * 100 <= 0.5 then
 			anomaly.spawn_time = time_elapsed + spawn_cooldown
 			for i = 1, ceil(random() ^ 2 * spawn_max_amount) do
 				local actor_position = actor:position()

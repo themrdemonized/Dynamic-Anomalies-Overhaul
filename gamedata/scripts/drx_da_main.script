@@ -116,7 +116,7 @@ local function shuffle(t)
    local s = {}
    for i = 1, #t do s[i] = t[i] end
    for i = #t, 2, -1 do
-     local j = math.random(i)
+     local j = random(i)
      s[i], s[j] = s[j], s[i]
    end
    return s
@@ -1532,7 +1532,7 @@ function spawn_artefacts_on_level(level_name)
 	local allowed_artefacts = drx_da_main_artefacts.allowed_artefacts
 	local allowed_artefacts_flipped = invert_table(allowed_artefacts)
 	local anomaly_type_to_artefacts = drx_da_main_artefacts.anomaly_type_to_artefacts
-	local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name] and shuffle(dup_table(drx_da_main_artefacts.artefacts_map_tiers[level_name]))
+	local artefacts_map_tiers = drx_da_main_artefacts.artefacts_map_tiers[level_name] and shuffle(drx_da_main_artefacts.artefacts_map_tiers[level_name])
 	local artefacts_map_chances = drx_da_main_artefacts.artefacts_map_chances and drx_da_main_artefacts.artefacts_map_chances[level_name]
 
 	-- Build anomalies table

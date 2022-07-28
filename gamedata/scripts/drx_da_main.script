@@ -1993,11 +1993,9 @@ anomalies_near_actor_functions = {
 		add_simple_timed_effect(1, function()
 			add_speed(key, ema(key, 0.5, 1, steps_in), false, true)
 			RemoveTimeEvent(key, key)
-			print_tip("%s speed %s", key, smoothed_values[key])
 		end, function()
 			CreateTimeEvent(key, key, 0, function()
 				add_speed(key, ema(key, 1, 1, steps_out, device().time_delta * 0.1), false, true)
-				print_tip("%s speed %s", key, smoothed_values[key])
 				if smoothed_values[key] >= 0.98 then
 					remove_speed(key)
 					return true

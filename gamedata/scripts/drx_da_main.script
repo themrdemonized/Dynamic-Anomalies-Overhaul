@@ -41,6 +41,7 @@ local sin = math.sin
 local sqrt = math.sqrt
 
 local CreateTimeEvent = demonized_time_events.CreateTimeEvent
+local RemoveTimeEvent = demonized_time_events.RemoveTimeEvent
 local process_queue = demonized_concurrent_queues.process_queue
 local remove_queue = demonized_concurrent_queues.remove_queue
 
@@ -140,45 +141,19 @@ local function printf(str, ...)
 	end
 end
 
+--EMA smoothing for changing values, frame independent
+local default_smoothing = 11.5
 local smoothed_values = {}
 
---EMA smoothing for changing values
-local default_smoothing = 500
-local alpha_table = {}
-
-local function ema(key, value, def, steps)
+local function ema(key, value, def, steps, delta)
 	local steps = steps or default_smoothing
-	if not alpha_table[steps] then alpha_table[steps] = 2.0 / (steps + 1) end
+	local delta = delta or steps
+	local smoothing_alpha = 2.0 / (steps + 1)
 
-	local smoothing_alpha = alpha_table[steps]
-	smoothed_values[key] = smoothed_values[key] and smoothed_values[key] + smoothing_alpha * (value - smoothed_values[key]) or def or value
+	smoothed_values[key] = smoothed_values[key] and smoothed_values[key] + min(smoothing_alpha * (delta / steps), 1) * (value - smoothed_values[key]) or def or value
+
 	--printf("EMA fired, key %s, target %s, current %s, going %s", key, value, smoothed_values[key], (value > smoothed_values[key] and "up" or "down"))
 	return smoothed_values[key]
-end
-
-local function dema(key, value, def, steps)
-	local e = ema(key, value, def, steps)
-	smoothed_values[key] = 2 * e - ema(key, e, def, steps)
-	--printf("DEMA fired, key %s, target %s, current %s, going %s", key, value, smoothed_values[key], (value > smoothed_values[key] and "up" or "down"))
-	return smoothed_values[key]
-end
-
-local function look_at_position(pos, actor)
-	if pos then
-		local pos = vector():set(pos.x, pos.y, pos.z)
-		local actor = actor or db.actor
-
-		local actor_position = device().cam_pos
-		local actor_direction = device().cam_dir
-		local look_distance = actor_position:distance_to(pos)
-		local look_position = vector():set(actor_position):add(actor_direction:mul(look_distance))
-
-		look_position.x = ema("look_x", pos.x, look_position.x)
-		look_position.y = ema("look_y", pos.y, look_position.y)
-		look_position.z = ema("look_z", pos.z, look_position.z)
-
-		actor:actor_look_at_point(look_position)
-	end
 end
 
 local get_safe_sound_object = xr_sound.get_safe_sound_object
@@ -419,7 +394,7 @@ anomaly_radii = {
 	zone_mine_gravitational_weak = {min = 2, max = 3},
 	zone_mine_gravitational_average = {min = 3, max = 4},
 	zone_mine_gravitational_strong = {min = 4, max = 5},
-	zone_mine_green_dragon = {min = 2, max = 3},
+	zone_mine_green_dragon = {min = 3, max = 4},
 	zone_mine_mefistotel = {min = 3, max = 4},
 	zone_mine_net = {min = 2, max = 3},
 	zone_mine_point = {min = 2, max = 3},
@@ -1976,6 +1951,7 @@ anomalies_near_actor_radii = {
 	zone_mine_darkness = anomaly_radii.zone_mine_darkness.max * 3.5,
 	zone_mine_gold = anomaly_radii.zone_mine_gold.max * 3,
 	zone_mine_sphere = anomaly_radii.zone_mine_sphere.max * 2,
+	zone_mine_green_dragon = anomaly_radii.zone_mine_green_dragon.max * 2,
 	zone_mine_ghost = anomaly_radii.zone_mine_ghost.max * 5,
 }
 
@@ -2010,12 +1986,23 @@ anomalies_near_actor_functions = {
 
 	-- Green Dragon, lower speed by 50% near it
 	zone_mine_green_dragon = function(anomaly, actor, distance_to_sqr, radius_sqr)
-		local key ="zone_mine_green_dragon"
+		local key ="zone_mine_green_dragon_speed"
+		local steps_in = 70
+		local steps_out = 22
 
-		add_simple_timed_effect(3.5, function()
-			add_speed(key, 0.5, false, true)
+		add_simple_timed_effect(1, function()
+			add_speed(key, ema(key, 0.5, 1, steps_in), false, true)
+			RemoveTimeEvent(key, key)
+			print_tip("%s speed %s", key, smoothed_values[key])
 		end, function()
-			remove_speed(key)
+			CreateTimeEvent(key, key, 0, function()
+				add_speed(key, ema(key, 1, 1, steps_out, device().time_delta * 0.1), false, true)
+				print_tip("%s speed %s", key, smoothed_values[key])
+				if smoothed_values[key] >= 0.98 then
+					remove_speed(key)
+					return true
+				end
+			end)
 		end, key, 1)
 	end,
 

@@ -3105,7 +3105,7 @@ local function on_option_change()
 	load_settings()
 	if settings.delete_dynamic_anomalies then
 		unregister_anomalies_behaviour()
-		clean_dynamic_anomalies_global()
+		force_clean_dynamic_anomalies_global()
 		build_anomalies_pos_tree()
 		if ui_mcm then
 			ui_mcm.set("drx_da/delete_dynamic_anomalies", false)
@@ -3352,6 +3352,133 @@ function update_dynamic_anomalies_on_level_after_surge(level_name)
 			return true
 		end, function()
 			printf("anomalies updated after surge on level %s", level_name)
+		end)
+	end
+end
+
+-- Removes all anomalies forcefully
+function force_clean_dynamic_anomalies_global()
+	remove_all_restrictions()
+	get_obj_restrictions(true)
+
+	unregister_anomalies_behaviour()
+
+	local alife_release_id = alife_release_id
+	local gg = game_graph()
+	local gg_vertex = gg.vertex
+	local level_name = level.name()
+	local load_var = load_var
+	local pairs = pairs
+	local printf = printf
+	local sim = alife()
+	local sim_level_name = sim.level_name
+	local sim_object = sim.object
+	local sim_release = sim.release
+	local alife_record = alife_record
+	local strformat = strformat
+
+	for k, v in pairs(updated_anomaly_levels) do
+		get_anomalies_by_smart(k)
+		clean_artefacts_on_level(k)
+		if false then
+			-- disable_anomalies_on_level(level_name)
+			-- v.disabled = true
+			-- clean_dynamic_anomalies_on_level_func(level_name)
+		else
+			for k1, v1 in pairs(v.anomalies) do
+				if true then
+					local se_obj = sim_object(sim, v1)
+					if se_obj then
+						if IsAnomaly(_, se_obj:clsid()) then
+							printf("Deleting anomaly %s, %s globally, level %s", se_obj:section_name(), v1, k)
+							alife_record(se_obj ,false)
+							alife():release(se_obj, true)
+						else
+							printf("Error, object is not an anomaly, %s, %s, on level %s", se_obj:section_name(), v1, k)
+						end
+					end
+
+					for k2, v2 in pairs(v.anomalies_by_smart) do
+						v2[v1] = nil
+						v.anomaly_types_by_smart[k2] = nil
+						if is_empty(v2) then
+							v.anomalies_by_smart[k2] = nil
+							v.available_smarts_reduced[k2] = nil
+						end
+					end
+
+					v.smart_by_anomalies[v1] = nil
+					v.anomalies_properties[v1] = nil
+					v.anomalies[k1] = nil
+				else
+					printf("can't delete anomaly %s globally, level %s, in restriction", v1, k)
+				end
+			end
+
+			-- Old anomalies
+			if true then
+				local fully_cleaned = true
+
+				for smart_name, v in pairs(SIMBOARD.smarts_by_names) do
+					local smart_level = sim_level_name(sim, gg_vertex(gg, v.m_game_vertex_id):level_id())
+					if smart_level == k then
+						for j = 1, 1000 do
+							local anom_id = load_var(db.actor, strformat("drx_da_anom_id_%s_%s", smart_name, j), nil)
+							if anom_id then
+								if true then
+									local o = alife_object(anom_id)
+									if o then 
+										alife_record(o ,false)
+										alife():release(o, true)
+									end
+								else
+									printf("Error, can't remove old anomaly %s, level %s, in restriction", anom_id, k)
+									fully_cleaned = false
+								end
+							end
+						end
+					end
+				end
+				v.cleaned_old_anomalies = fully_cleaned
+			else
+				printf("old anomalies already cleaned on level %s", k)
+			end
+		end
+	end
+
+	-- Clean from new sections
+	local new_sections = {
+		zone_mine_darkness = true,
+		zone_mine_flash = true,
+		zone_mine_ghost = true,
+		zone_mine_gold = true,
+		zone_mine_green_dragon = true,
+		zone_mine_mefistotel = true,
+		zone_mine_net = true,
+		zone_mine_point = true,
+		zone_mine_radar = true,
+		zone_mine_sphere = true,
+		zone_unknown = true,
+		zone_mine_acid = true,
+		zone_mine_electra = true,
+		zone_mine_springboard = true,
+		zone_mine_vortex = true,
+		zone_mine_blast = true,
+		zone_mine_zharka = true,
+		zone_mine_vapour = true,
+	}
+	for i = 1, 65534 do
+		local se_obj = sim_object(sim, i)
+		if se_obj and new_sections[se_obj:section_name()] then
+			sim_release(sim, se_obj, true)
+		end
+	end
+
+	printf("Cleaned dynamic anomalies globally")
+	if settings.save_after_cleanup then
+		CreateTimeEvent("drx_da_save_after_cleanup", 0, 0.1, function()
+			exec_console_cmd("save " .. (user_name() or "") .. " - DAO tempsave")
+			return true
 		end)
 	end
 end

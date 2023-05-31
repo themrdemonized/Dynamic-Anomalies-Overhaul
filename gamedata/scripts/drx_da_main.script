@@ -1089,16 +1089,19 @@ function drx_da_spawn_anomalies_on_level(level_name)
 	end
 
 	-- Combine radiation fields to one type
-	-- local rad_fields = {}
-	-- for i = #anomaly_list, 1, -1 do
-	-- 	if anomalies_radiation_fields[anomaly_list[i]] then
-	-- 		rad_fields[#rad_fields + 1] = anomaly_list[i]
-	-- 		table_remove(anomaly_list, i)
-	-- 	end
-	-- end
-	-- if is_not_empty(rad_fields) then
-	-- 	anomaly_list[#anomaly_list + 1] = "zone_radiation_field"
-	-- end
+	local rad_fields = {}
+	for i = #anomaly_list, 1, -1 do
+		if anomalies_radiation_fields[anomaly_list[i]] then
+			rad_fields[#rad_fields + 1] = anomaly_list[i]
+			table_remove(anomaly_list, i)
+		end
+	end
+	if is_not_empty(rad_fields) then
+		for i = 1, math.ceil(#rad_fields / 2) do
+			if is_empty(rad_fields) then break end
+			anomaly_list[#anomaly_list + 1] = table_remove(rad_fields, math.random(#rad_fields))
+		end
+	end
 
 	-- Build anomalies table
 	if is_not_empty(smart_list) then

@@ -28,9 +28,9 @@ local function distance_to_xz_sqr(a, b)
 		return a:distance_to_xz_sqr(b)
 	end
 
-	local a = b.x - a.x
-	local b = b.z - a.z
-	return a * a + b * b
+	local va = b.x - a.x
+	local vb = b.z - a.z
+	return va * va + vb * vb
 end
 
 local function table_nexter(t)

@@ -388,7 +388,7 @@ anomaly_radii = {
 	zone_mine_electric_weak = {min = 2, max = 3},
 	zone_mine_electric_average = {min = 2, max = 3},
 	zone_mine_electric_strong = {min = 2, max = 3},
-	zone_mine_flash = {min = 3, max = 3},
+	zone_mine_flash = {min = 3, max = 4},
 	zone_mine_ghost = {min = 2, max = 3},
 	zone_mine_gold = {min = 2, max = 3},
 	zone_mine_gravitational_weak = {min = 2, max = 3},
@@ -2904,7 +2904,7 @@ anomalies_hit_functions = {
 	zone_mine_flash = function(s_hit, bone_id, flags, actor)
 		printf("change_time")
 		local health = actor.health
-		local change_hours = random(2, 5)
+		local change_hours = random(3, 8)
 		local change_minutes = random(1, 59)
 
 		level.change_game_time(0, change_hours, change_minutes)
@@ -2913,7 +2913,7 @@ anomalies_hit_functions = {
 		psi_storm_manager.get_psi_storm_manager().time_forwarded = true
 
 		s_hit.power = 0.001
-		CreateTimeEvent("zone_mine_flash", "zone_mine_flash", 0.05, function()
+		CreateTimeEvent("zone_mine_flash", "zone_mine_flash", 0.1, function()
 			local new_health = actor.health
 			actor:set_health_ex(health)
 			actor:change_health(-random_float(0.01, 0.04))

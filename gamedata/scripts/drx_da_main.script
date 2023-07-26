@@ -2913,6 +2913,12 @@ anomalies_hit_functions = {
 		psi_storm_manager.get_psi_storm_manager().time_forwarded = true
 
 		s_hit.power = 0.001
+
+		local fatigue_light_state = true
+		if fatigue_light then
+			fatigue_light_state = fatigue_light.enabled
+			fatigue_light.enabled = false
+		end
 		CreateTimeEvent("zone_mine_flash", "zone_mine_flash", 0.1, function()
 			local new_health = actor.health
 			actor:set_health_ex(health)
@@ -2934,6 +2940,11 @@ anomalies_hit_functions = {
 
 			thirst_sleep_changer.change_sleep(round(change_sleep_amount))
 			thirst_sleep_changer.change_thirst(round(change_thirst_amount))
+
+			if fatigue_light then
+				fatigue_light.enabled = fatigue_light_state
+			end
+
 			return true
 		end)
 	end,
